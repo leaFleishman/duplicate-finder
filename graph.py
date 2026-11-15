@@ -154,13 +154,26 @@ def _close_previous_item(state: State) -> list[dict]:
     return [row]
 
 
+CROSS_PROJECT_BLOCK_MESSAGE = (
+    "התיקיות שייכות לפרויקטים שונים. מחיקה עלולה לשבור את הפרויקט, ולכן אינה אפשרית כאן."
+)
+
+
+def deletion_blocked(item: dict | None) -> bool:
+    """A group whose members are all in different projects can only be skipped (even when shown)."""
+    return bool(item) and item["type"] == "duplicate" and scanner.is_cross_project(item)
+
+
 def shared_delete_allowed(item: dict, judgement: dict | None) -> bool:
-    return item["type"] == "duplicate" and judgement is not None and judgement["verdict"] in SHARED_DELETE_VERDICTS
+    return (item["type"] == "duplicate" and judgement is not None
+            and judgement["verdict"] in SHARED_DELETE_VERDICTS and not deletion_blocked(item))
 
 
 def _sanitize_decision(item: dict, decision: Any, judgement: dict | None = None) -> tuple[dict, str | None]:
     """Turn the resume value into a valid decision; anything invalid becomes skip."""
     action = decision.get("action") if isinstance(decision, dict) else None
+    if deletion_blocked(item) and action not in (None, "skip"):
+        return {"action": "skip"}, f"{CROSS_PROJECT_BLOCK_MESSAGE} הפריט דולג."
     if action == "delete_shared":
         members = {m["id"]: m for m in item.get("members", [])}
         source, keep_in = decision.get("from"), decision.get("keep_in")
@@ -278,9 +291,11 @@ def human_review(state: State) -> dict:
         "low_confidence": judgement is not None and judgement["confidence"] < threshold,
         "actions": (
             ZIP_ACTIONS if item["type"] == "zip"
+            else ["skip"] if deletion_blocked(item)
             else ["delete", "delete_shared", "skip"] if shared_delete_allowed(item, judgement)
             else DUPLICATE_ACTIONS
         ),
+        "blocked_reason": CROSS_PROJECT_BLOCK_MESSAGE if deletion_blocked(item) else None,
     }
     decision, warning = _sanitize_decision(item, interrupt(payload), judgement)
     update = {"decision": decision}
@@ -352,6 +367,15 @@ def _execute_shared(state: State) -> dict:
 
 def execute(state: State) -> dict:
     item, decision, judgement = state["current"], state["decision"], state["judgement"]
+    if deletion_blocked(item):
+        # Extra guard: human_review never lets a deletion through for such a group.
+        warning = f"{CROSS_PROJECT_BLOCK_MESSAGE} לא נמחק דבר (קבוצה {item['id']})."
+        row = actions.make_log_row(
+            item["id"], item["type"], actions.ACTION_NOT_DELETED, "; ".join(item_paths(item)), 0,
+            judgement, decision["action"], _recommendation_outcome(item, decision, judgement),
+        )
+        actions.append_log([row])
+        return {"warnings": state["warnings"] + [warning], "log": state["log"] + [row]}
     if decision["action"] == "delete_shared":
         return _execute_shared(state)
     outcome = _recommendation_outcome(item, decision, judgement)

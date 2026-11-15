@@ -70,6 +70,11 @@ def print_duplicate(payload: dict) -> None:
 
 def read_duplicate_decision(payload: dict) -> dict:
     members = {m["id"]: m["path"] for m in payload["item"]["members"]}
+    if payload.get("blocked_reason"):
+        print(f"  {payload['blocked_reason']}")
+        while ask("  פקודה [s = דלג]: ").lower() != "s":
+            print("  אפשר רק לדלג על הקבוצה הזו.")
+        return {"action": "skip"}
     while True:
         shared = "delete_shared" in payload["actions"]
         prompt = "  פקודה [d A,B = מחק את המסומנים | " + ("x A B = מחק מ-A רק קבצים שקיימים גם ב-B | " if shared else "") + "s = דלג]: "

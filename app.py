@@ -265,25 +265,29 @@ def duplicate_card(payload: dict, interrupt_id: str) -> None:
     st.markdown("**סימון תיקיות למחיקה:**")
     selected = [
         m["path"] for m in members
-        if st.checkbox(f"תיקייה {ltr(m['id'])} · {isolate(m['name'])}", key=f"{interrupt_id}:{m['id']}")
+        if st.checkbox(f"תיקייה {ltr(m['id'])} · {isolate(m['name'])}", key=f"{interrupt_id}:{m['id']}",
+                       disabled=bool(payload.get("blocked_reason")))
     ]
+    blocked = payload.get("blocked_reason")
+    if blocked:
+        st.warning(blocked)
     deletes_all = len(selected) == len(members)
     if deletes_all:
         st.error("אי אפשר למחוק את כל התיקיות בקבוצה – לפחות אחת חייבת להישאר.")
     delete_column, skip_column, _ = st.columns([1, 1, 3])
     delete_column.button(
-        "מחק את המסומנים", type="primary", disabled=not selected or deletes_all,
+        "מחק את המסומנים", type="primary", disabled=bool(blocked) or not selected or deletes_all,
         on_click=request_resume, args=(interrupt_id, {"action": "delete", "paths": selected}),
         key=f"{interrupt_id}:delete",
     )
     skip_column.button("דלג", on_click=request_resume, args=(interrupt_id, {"action": "skip"}),
                        key=f"{interrupt_id}:skip")
 
-    if "delete_shared" in payload["actions"]:
-        shared_delete_buttons(members, interrupt_id)
+    if "delete_shared" in payload["actions"] or blocked:
+        shared_delete_buttons(members, interrupt_id, disabled=bool(blocked))
 
 
-def shared_delete_buttons(members: list[dict], interrupt_id: str) -> None:
+def shared_delete_buttons(members: list[dict], interrupt_id: str, disabled: bool = False) -> None:
     """For each member and each other member: delete only the files that also exist there."""
     options = [
         (member, other_id, info)
@@ -301,7 +305,7 @@ def shared_delete_buttons(members: list[dict], interrupt_id: str) -> None:
                  f"({isolate(names[other_id])}): {info['count']} קבצים, "
                  f"יתפנו {ltr(format_size(info['size_bytes']))}")
         st.button(
-            label, on_click=request_resume,
+            label, on_click=request_resume, disabled=disabled,
             args=(interrupt_id, {"action": "delete_shared", "from": member["id"], "keep_in": other_id}),
             key=f"{interrupt_id}:shared:{member['id']}:{other_id}",
         )
