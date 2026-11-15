@@ -73,6 +73,9 @@ Groups
 - Pairs with overlap between the threshold and 1.0 form two-member groups.
 - For each group, calculate the overlap percentage and, for each member, a list of unique files (files not present in any other member of the group), including relative paths and sizes.
 - A folder that contains nothing except a single subfolder with the same content (for example "X\X") is represented by the outer folder only, so the same content never appears twice in one group.
+Shared Files (for "delete only the shared files")
+- For each member of a group, and for each other member, the scanner stores in member["shared_with"][other_id]: the number of files, their total size, and a list of entries {relative_path, size_bytes, sha256, other_relative_path}. An entry is a file in this member that has an identical copy (same SHA-256) in the other member; other_relative_path is where that copy is (it may have a different name or folder). Files that were not hashed (unique size or unreadable) are never listed.
+- This data is not sent to the LLM.
 Project Detection
 - For each group member, find the nearest ancestor folder (not the member itself) that directly contains a project marker file: any .html, .htm, .csproj or .sln file, or a file named package.json or requirements.txt.
 - Store its path in the member's "project" field (None if there is none). Pass it to the LLM (v2 and v3) and show it in the interface ("פרויקט" column in the CLI and Streamlit).
@@ -166,7 +169,7 @@ Nodes and Flow
    - Otherwise: human_review.
 7. human_review: Call interrupt() with a payload containing the item, the recommendation (if available), a low_confidence flag, and the available actions.
    Resume values:
-   - Duplicate: {"action": "delete", "paths": [...]} or {"action": "skip"}.
+   - Duplicate: {"action": "delete", "paths": [...]}, {"action": "skip"}, or {"action": "delete_shared", "from": id, "keep_in": id}. The last one is offered only when the verdict is identical or copy_with_changes, and only for a pair with shared files; otherwise it becomes a skip with a warning.
    - ZIP: {"action": "delete_zip"}, {"action": "delete_folder"}, or {"action": "skip"}.
    An invalid resume value (unknown paths, deleting every member, or deleting none) becomes a skip with a warning.
 8. Routing after human_review:
@@ -175,16 +178,18 @@ Nodes and Flow
    - Skip without children: pick_next.
 9. expand_children: Add the hidden groups to the front of the queue so they are displayed immediately, then proceed to pick_next.
 10. execute: For each path, recheck that it still exists and that its size and file count have not changed since the scan. If anything has changed, do not delete it and display a warning. Otherwise, call send2trash, update deleted_paths and freed_bytes, and record a log entry. Then proceed to pick_next.
+    delete_shared: delete from member "from" only the files that have an identical copy in member "keep_in". Per file, before send2trash: (1) the file and its copy must both still exist, (2) both must still have the scanned SHA-256 (they are rehashed), and (3) the member that holds the copy must not be missing. A file that fails any check is not deleted and a warning is added; the rest continue. A file with no identical copy in another remaining member is never deleted. The folder itself is never deleted by this action (it may become empty, and is then handled by review_empty_folders). The member "keep_in" becomes protected (state.protected_paths) if at least one file was deleted: for the rest of the run it, anything inside it, and any folder that contains it, are never deleted as a whole, because it holds the only remaining copy. The action writes one log row.
 11. review_empty_folders: A single interrupt containing all empty folders. Resume value: {"delete": [...paths]}. Delete the selected folders after rechecking that they are still empty, then proceed to summary.
 12. summary: Counts of items reviewed, deleted, and skipped; space freed; warnings.
 Checkpointer
 Use SqliteSaver with a local file (checkpoints.sqlite) so that a workflow can be resumed after restarting Streamlit.
 Every graph invocation is sent with metadata {"thread_id": ...}, so a run and its later resumes are grouped together in the LangSmith Threads view. The recursion limit is raised (10,000) because the review loop can run many steps between interrupts.
 Action Log (actions.py)
-Append one row for every decision to logs/actions_log.csv, with these columns: timestamp, item_type, action, path, size_bytes, llm_verdict, llm_keep, llm_confidence, user_decision, recommendation_outcome.
+Append one row for every decision to logs/actions_log.csv, with these columns: timestamp, item_type, action, path, size_bytes, llm_verdict, llm_keep, llm_confidence, user_decision, recommendation_outcome, files_deleted, skipped_files.
+files_deleted and skipped_files are filled only for delete_shared: the number of files deleted, and the relative paths of files that were skipped (separated by "; "). For delete_shared, size_bytes is the total size actually freed and path is the member the files were deleted from. A log written by an older version (fewer columns) is upgraded in place on the next write.
 recommendation_outcome values:
-- followed: the decision matches the recommendation (exactly the members not in keep were deleted).
-- overridden: different members were deleted than recommended.
+- followed: the decision matches the recommendation (exactly the members not in keep were deleted; for delete_shared, files were removed from a member that is not in keep).
+- overridden: different members were deleted than recommended (for delete_shared, files were removed from a member that is in keep).
 - skipped: the user skipped a group that had a recommendation.
 - empty: there was no recommendation (ZIP items, empty folders, LLM failure), or there was no user decision (an item classified as different).
 - The log file is written with a UTF-8 BOM so that Excel shows Hebrew correctly. It contains real, private paths and is excluded from git, together with checkpoints.sqlite.
@@ -204,9 +209,10 @@ Streamlit Interface (app.py)
   - The recommendation and explanation, with a prominent banner saying "המערכת לא בטוחה, כדאי לבדוק" ("The system is uncertain; please review") if confidence is below the threshold.
   - For each member with unique files, show an expandable list and the warning "קבצים אלה יימחקו אם תמחקי תיקייה זו" ("These files will be deleted if you delete this folder").
   - Checkboxes for selecting members to delete (none checked by default), and buttons "מחק את המסומנים" ("Delete selected") and "דלג" ("Skip"). Do not allow deletion of every member of a group.
+  - When delete_shared is offered: for each member and each other member that has shared files, a button "מחק מתיקייה X רק את הקבצים שקיימים גם ב-Y" ("Delete from folder X only the files that also exist in Y"), with the number of files and the size that would be freed. A short note explains that each file is rechecked and that the folder that keeps the copies becomes protected.
 - ZIP card: ZIP path and folder path, sizes, whether extraction is complete, and a list of missing files if extraction is partial, with a warning. No recommendation. Buttons: "מחק את ה-ZIP" ("Delete ZIP"), "מחק את התיקייה" ("Delete folder"), and "דלג" ("Skip").
 - Empty folders screen: A list with a checkbox for each folder, buttons "בחר הכל" ("Select all") and "נקה הכל" ("Clear all"), and a "מחק את המסומנות" ("Delete selected") button.
-- Summary screen: Include a link to the log file.
+- Summary screen: Include a link to the log file, and the number of shared files deleted (when there were any).
 - The interface must be in Hebrew and use right-to-left (RTL) layout. Tables and lists are HTML (st.dataframe does not support RTL). Left-to-right values inside Hebrew text (sizes such as "1.25 MB", IDs, paths) are isolated with <bdi> in HTML and with Unicode isolate marks in plain-text labels, so they are not reordered.
 cli.py
 Run the same graph in the terminal: accept paths, print each item, and read decisions from the keyboard. Intended for debugging before implementing Streamlit.

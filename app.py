@@ -275,6 +275,33 @@ def duplicate_card(payload: dict, interrupt_id: str) -> None:
     skip_column.button("דלג", on_click=request_resume, args=(interrupt_id, {"action": "skip"}),
                        key=f"{interrupt_id}:skip")
 
+    if "delete_shared" in payload["actions"]:
+        shared_delete_buttons(members, interrupt_id)
+
+
+def shared_delete_buttons(members: list[dict], interrupt_id: str) -> None:
+    """For each member and each other member: delete only the files that also exist there."""
+    options = [
+        (member, other_id, info)
+        for member in members
+        for other_id, info in member.get("shared_with", {}).items()
+    ]
+    if not options:
+        return
+    names = {m["id"]: m["name"] for m in members}
+    st.markdown("**מחיקת קבצים משותפים בלבד** (התיקייה עצמה נשארת, וגם הקבצים הייחודיים שבה):")
+    st.caption("רק קבצים שיש להם עותק זהה בתיקייה השנייה יימחקו, אחרי בדיקה חוזרת של כל קובץ. "
+               "התיקייה שהעותקים נשארים בה תהיה מוגנת ולא תימחק בהמשך ההרצה.")
+    for member, other_id, info in options:
+        label = (f"מחק מתיקייה {ltr(member['id'])} רק את הקבצים שקיימים גם ב-{ltr(other_id)} "
+                 f"({isolate(names[other_id])}): {info['count']} קבצים, "
+                 f"יתפנו {ltr(format_size(info['size_bytes']))}")
+        st.button(
+            label, on_click=request_resume,
+            args=(interrupt_id, {"action": "delete_shared", "from": member["id"], "keep_in": other_id}),
+            key=f"{interrupt_id}:shared:{member['id']}:{other_id}",
+        )
+
 
 def zip_card(payload: dict, interrupt_id: str) -> None:
     item = payload["item"]
@@ -320,6 +347,9 @@ def summary_card(summary: dict) -> None:
     columns = st.columns(5)
     columns[0].metric("פריטים שנבדקו", summary["reviewed"])
     columns[1].metric("נמחקו (לסל המחזור)", summary["deleted"])
+    if summary.get("shared_files_deleted"):
+        st.caption(f"בנוסף נמחקו {ltr(str(summary['shared_files_deleted']))} קבצים משותפים "
+                   "(מחיקה של קבצים בלבד, בלי התיקייה).")
     columns[2].metric("דולגו", summary["skipped"])
     columns[3].metric("סווגו כשונים", summary["classified_different"])
     columns[4].metric("מקום שהתפנה", ltr(format_size(summary["freed_bytes"])))
