@@ -211,3 +211,44 @@ def test_ui_checkbox_shows_the_library(env):
     seen, captions = walk_ui(env, include=True)
     assert any("fontawesome" in s for s in seen)
     assert "שלא הוצגו" not in captions
+
+
+# ------------------------------------------------------- Project markers
+
+
+@pytest.mark.parametrize("marker, is_project", [
+    ("index.html", True),
+    ("INDEX.HTML", True),          # Windows names are case-insensitive
+    ("package.json", True),
+    ("requirements.txt", True),
+    ("App.csproj", True),
+    ("Solution.sln", True),
+    ("about.html", False),         # Any other .html is not enough
+    ("report.htm", False),
+    ("saved page.html", False),
+    ("readme.txt", False),
+])
+def test_project_markers(tmp_path, marker, is_project):
+    (tmp_path / "parent" / "member").mkdir(parents=True)
+    (tmp_path / "parent" / marker).write_text("x", encoding="utf-8")
+    project = scanner.find_project(str(tmp_path / "parent" / "member"))
+    assert (project == str(tmp_path / "parent")) is is_project
+
+
+def test_saved_web_pages_do_not_make_a_project(tmp_path):
+    """Two copies of a folder next to saved .html pages are not "different projects"."""
+    for side in ("a", "b"):
+        (tmp_path / side / "lib").mkdir(parents=True)
+        (tmp_path / side / "saved article.html").write_text("x", encoding="utf-8")
+    assert scanner.find_project(str(tmp_path / "a" / "lib")) is None
+    assert scanner.find_project(str(tmp_path / "b" / "lib")) is None
+
+
+def test_case_11_and_case_06_still_have_projects(scanned):
+    """Both sites contain index.html, so both cases are still inside two different projects."""
+    root, result = scanned
+    candidates = scanner.find_candidates(result, config.DEFAULT_OVERLAP_THRESHOLD, config.DEFAULT_MIN_FOLDER_SIZE_MB,
+                                         include_cross_project=True)
+    by_members = {frozenset(member_sets(root, [g])[0]): g for g in all_groups(candidates)}
+    for members in (LIBRARY, NESTED_IMAGES):
+        assert scanner.is_cross_project(by_members[frozenset(members)])

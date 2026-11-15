@@ -42,8 +42,9 @@ IO_REPARSE_TAG_MOUNT_POINT = 0xA0000003  # Junction
 MAX_PATH_LENGTH = 260
 
 # A folder is a project root if it directly contains one of these files.
-PROJECT_MARKER_NAMES = {"package.json", "requirements.txt"}
-PROJECT_MARKER_EXTENSIONS = {".html", ".htm", ".csproj", ".sln"}
+# Any .html file is not enough (saved web pages, exported reports); only index.html counts.
+PROJECT_MARKER_NAMES = {"package.json", "requirements.txt", "index.html"}
+PROJECT_MARKER_EXTENSIONS = {".csproj", ".sln"}
 
 # Detection defaults (adjustable from the UI).
 DEFAULT_OVERLAP_THRESHOLD = 0.7

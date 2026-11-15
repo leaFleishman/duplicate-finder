@@ -43,7 +43,7 @@ duplicate-finder/
 └── README.md
 config.py
 - SKIP_DIR_NAMES: Windows, Program Files, Program Files (x86), ProgramData, $Recycle.Bin, System Volume Information, AppData, .git, .svn, .vs, .idea, .vscode, node_modules, bin, obj, venv, .venv, __pycache__.
-- PROJECT_MARKER_NAMES = {"package.json", "requirements.txt"} and PROJECT_MARKER_EXTENSIONS = {".html", ".htm", ".csproj", ".sln"}: files that mark a project root (see "Project Detection").
+- PROJECT_MARKER_NAMES = {"package.json", "requirements.txt", "index.html"} and PROJECT_MARKER_EXTENSIONS = {".csproj", ".sln"}: files that mark a project root (see "Project Detection").
 - DEFAULT_OVERLAP_THRESHOLD = 0.7: Minimum overlap for a pair to qualify as a candidate.
 - DEFAULT_MIN_FOLDER_SIZE_MB = 1
 - DEFAULT_CONFIDENCE_THRESHOLD = 0.7
@@ -75,7 +75,7 @@ Groups
 - For each group, calculate the overlap percentage and, for each member, a list of unique files (files not present in any other member of the group), including relative paths and sizes.
 - A folder that contains nothing except a single subfolder with the same content (for example "X\X") is represented by the outer folder only, so the same content never appears twice in one group.
 Project Detection
-- For each group member, find the nearest ancestor folder (not the member itself) that directly contains a project marker file: any .html, .htm, .csproj or .sln file, or a file named package.json or requirements.txt.
+- For each group member, find the nearest ancestor folder (not the member itself) that directly contains a project marker file: a file named package.json, requirements.txt or index.html, or any .csproj or .sln file (names compared case-insensitively). Other .html files are not enough: saved web pages and exported reports are common in ordinary folders and would turn them into "projects".
 - Store its path in the member's "project" field (None if there is none). Pass it to the LLM (v2 and v3) and show it in the interface ("פרויקט" column in the CLI and Streamlit).
 - Reason: identical library folders (for example css or fontawesome) inside two different projects are both needed; deleting one breaks that project. This case was discovered only in real use.
 Cross-Project Groups (hidden by default)
