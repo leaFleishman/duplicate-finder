@@ -49,6 +49,8 @@ def print_duplicate(payload: dict) -> None:
               f"שינוי אחרון: {member['latest_modified']}")
         if member.get("project"):
             print(f"     בתוך פרויקט: {member['project']}")
+        for other_id, info in member.get("shared_with", {}).items():
+            print(f"     {info['count']} קבצים משותפים עם {other_id} ({format_size(info['size_bytes'])})")
         if member["unique_count"]:
             print(f"     קבצים ייחודיים ({member['unique_count']}) - "
                   "קבצים אלה יימחקו אם תמחקי תיקייה זו:")
@@ -69,9 +71,18 @@ def print_duplicate(payload: dict) -> None:
 def read_duplicate_decision(payload: dict) -> dict:
     members = {m["id"]: m["path"] for m in payload["item"]["members"]}
     while True:
-        answer = ask("  פקודה [d A,B = מחק את המסומנים | s = דלג]: ")
+        shared = "delete_shared" in payload["actions"]
+        prompt = "  פקודה [d A,B = מחק את המסומנים | " + ("x A B = מחק מ-A רק קבצים שקיימים גם ב-B | " if shared else "") + "s = דלג]: "
+        answer = ask(prompt)
         if answer.lower() == "s":
             return {"action": "skip"}
+        parts = answer.upper().split()
+        if shared and len(parts) == 3 and parts[0] == "X":
+            source, other = parts[1], parts[2]
+            info = next((m["shared_with"].get(other) for m in payload["item"]["members"] if m["id"] == source), None)
+            if info:
+                print(f"  יימחקו {info['count']} קבצים מ-{source}, יתפנו {format_size(info['size_bytes'])}")
+                return {"action": "delete_shared", "from": source, "keep_in": other}
         if answer.lower().startswith("d "):
             ids = [i.strip().upper() for i in answer[2:].split(",") if i.strip()]
             if ids and all(i in members for i in ids) and len(set(ids)) < len(members):

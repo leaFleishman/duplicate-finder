@@ -12,6 +12,7 @@ import scanner
 LOG_COLUMNS = [
     "timestamp", "item_type", "action", "path", "size_bytes",
     "llm_verdict", "llm_keep", "llm_confidence", "user_decision", "recommendation_outcome",
+    "files_deleted", "skipped_files",  # Filled only for "delete only shared files"
 ]
 
 # Values of the "recommendation_outcome" column ("" = there was no recommendation:
@@ -25,6 +26,21 @@ ACTION_MOVED = "הועבר לסל המחזור"
 ACTION_NOT_DELETED = "לא נמחק"
 ACTION_SKIPPED = "דילוג"
 ACTION_DIFFERENT = "סווג כשונה"
+ACTION_SHARED_DELETED = "נמחקו קבצים משותפים"
+
+
+def verify_shared_file(path: str, copy_path: str, expected_sha256: str) -> str | None:
+    """Before deleting one shared file: the file and its copy in the other member must both
+    still exist and still have the scanned hash. Return a warning, or None if it is safe."""
+    if not os.path.isfile(path):
+        return f"הקובץ כבר לא קיים: {path}"
+    if not os.path.isfile(copy_path):
+        return f"העותק בתיקייה השנייה כבר לא קיים, הקובץ לא נמחק: {path}"
+    if scanner.sha256_file(path) != expected_sha256:
+        return f"הקובץ השתנה מאז הסריקה, לא נמחק: {path}"
+    if scanner.sha256_file(copy_path) != expected_sha256:
+        return f"העותק בתיקייה השנייה השתנה מאז הסריקה, הקובץ לא נמחק: {path}"
+    return None
 
 
 def revalidate(path: str, expected_size: int, expected_file_count: int, is_file: bool) -> str | None:
@@ -60,6 +76,8 @@ def make_log_row(
     judgement: dict | None,
     user_decision: str,
     recommendation_outcome: str,
+    files_deleted: int | str = "",
+    skipped_files: list[str] | None = None,
 ) -> dict:
     """A log row. item_id is kept in the graph state only, not in the CSV."""
     return {
@@ -73,8 +91,26 @@ def make_log_row(
         "llm_confidence": judgement["confidence"] if judgement else "",
         "user_decision": user_decision,
         "recommendation_outcome": recommendation_outcome,
+        "files_deleted": files_deleted,
+        "skipped_files": "; ".join(skipped_files or []),
         "item_id": item_id,
     }
+
+
+def _upgrade_log_header(log_path: str) -> None:
+    """A log written by an older version has fewer columns: rewrite it with the current
+    header (old rows get empty values in the new columns), so that new rows line up."""
+    with open(log_path, newline="", encoding="utf-8-sig") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames == LOG_COLUMNS:
+            return
+        rows = list(reader)
+    temporary = log_path + ".tmp"
+    with open(temporary, "w", newline="", encoding="utf-8-sig") as handle:
+        writer = csv.DictWriter(handle, fieldnames=LOG_COLUMNS, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+    os.replace(temporary, log_path)
 
 
 def append_log(rows: list[dict], log_path: str | None = None) -> None:
@@ -83,6 +119,8 @@ def append_log(rows: list[dict], log_path: str | None = None) -> None:
     log_path = log_path or config.ACTIONS_LOG_PATH
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
     is_new = not os.path.exists(log_path)
+    if not is_new:
+        _upgrade_log_header(log_path)
     # utf-8-sig so that Excel displays Hebrew correctly.
     with open(log_path, "a", newline="", encoding="utf-8-sig" if is_new else "utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=LOG_COLUMNS, extrasaction="ignore")

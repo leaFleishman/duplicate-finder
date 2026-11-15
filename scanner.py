@@ -5,7 +5,7 @@ Public API:
     find_candidates(scan_result, overlap_threshold, min_folder_size_mb) -> dict
     is_within(path, parent) -> bool
     validate_root(path) -> error message or None
-    measure_folder(path), is_empty_on_disk(path), find_empty_folders_on_disk(roots)
+    measure_folder(path), is_empty_on_disk(path), find_empty_folders_on_disk(roots), sha256_file(path)
 """
 
 import hashlib
@@ -224,14 +224,15 @@ def _hash_files(files: list[FileInfo], warnings: list[str]) -> None:
             same_size[0].hash_key = UNIQUE_PREFIX + same_size[0].path
             continue
         for file in same_size:
-            digest = _sha256(file.path)
+            digest = sha256_file(file.path)
             if digest is None:
                 warnings.append(f"לא ניתן לקרוא את הקובץ (ייתכן שהוא נעול), דולג: {file.path}")
                 digest = UNIQUE_PREFIX + file.path
             file.hash_key = digest
 
 
-def _sha256(path: str) -> str | None:
+def sha256_file(path: str) -> str | None:
+    """SHA-256 of a file, read in blocks; None if it cannot be read."""
     digest = hashlib.sha256()
     try:
         with open(path, "rb") as handle:
@@ -391,11 +392,32 @@ def find_project(path: str, cache: dict | None = None) -> str | None:
         current = parent
 
 
+def _shared_files(files: list[FileInfo], path: str, other_files: list[FileInfo], other_path: str) -> list[dict]:
+    """Files of one member that have an identical copy (same SHA-256) in another member."""
+    copy_by_hash = {}
+    for file in other_files:
+        if not file.hash_key.startswith(UNIQUE_PREFIX):
+            copy_by_hash.setdefault(file.hash_key, file)
+    shared = [
+        {
+            "relative_path": os.path.relpath(f.path, path),
+            "size_bytes": f.size,
+            "sha256": f.hash_key,
+            "other_relative_path": os.path.relpath(copy_by_hash[f.hash_key].path, other_path),
+        }
+        for f in files
+        if f.hash_key in copy_by_hash
+    ]
+    return sorted(shared, key=lambda s: s["relative_path"])
+
+
 def _build_group(scan_result: ScanResult, member_paths: list[str], jaccard: float, containment: float) -> dict:
     folders = scan_result.folders
     project_cache = scan_result.project_cache
+    files_by_member = {path: list(_iter_files(scan_result, path)) for path in member_paths}
+    ids = {path: chr(ord("A") + number) for number, path in enumerate(member_paths)}
     members = []
-    for number, path in enumerate(member_paths):
+    for path in member_paths:
         other_hashes = set()
         for other in member_paths:
             if other != path:
@@ -403,14 +425,26 @@ def _build_group(scan_result: ScanResult, member_paths: list[str], jaccard: floa
         unique_files = sorted(
             (
                 {"relative_path": os.path.relpath(f.path, path), "size_bytes": f.size}
-                for f in _iter_files(scan_result, path)
+                for f in files_by_member[path]
                 if f.hash_key not in other_hashes
             ),
             key=lambda u: u["relative_path"],
         )
+        # For each other member: the files here that also exist there (for "delete only shared files").
+        shared_with = {}
+        for other in member_paths:
+            if other == path:
+                continue
+            shared = _shared_files(files_by_member[path], path, files_by_member[other], other)
+            if shared:
+                shared_with[ids[other]] = {
+                    "count": len(shared),
+                    "size_bytes": sum(s["size_bytes"] for s in shared),
+                    "files": shared,
+                }
         folder = folders[path]
         members.append({
-            "id": chr(ord("A") + number),
+            "id": ids[path],
             "path": path,
             "name": folder.name,
             "size_bytes": folder.total_size,
@@ -419,6 +453,7 @@ def _build_group(scan_result: ScanResult, member_paths: list[str], jaccard: floa
             "unique_files": unique_files,
             "unique_count": len(unique_files),
             "project": find_project(path, project_cache),  # Path of the enclosing project, or None
+            "shared_with": shared_with,  # other member ID -> {"count", "size_bytes", "files"}
         })
     return {
         "type": "duplicate",

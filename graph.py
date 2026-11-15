@@ -12,8 +12,14 @@ Nodes that call interrupt() have no side effects before it, because they
 restart from the beginning on resume. Files are deleted and log rows are
 written only in execute and review_empty_folders, and (for skip / "different"
 decisions) at the start of the following pick_next.
+
+"Delete only shared files" (action delete_shared) removes from one member only the
+files that have an identical copy in another member. Every file is rechecked (both
+copies exist, both hashes unchanged) before send2trash, and the member that keeps the
+copies becomes protected: it is never deleted as a whole folder later in the run.
 """
 
+import os
 import sqlite3
 from typing import Annotated, Any, TypedDict
 
@@ -31,6 +37,8 @@ RECURSION_LIMIT = 10_000  # The review loop can run many steps between interrupt
 
 DUPLICATE_ACTIONS = ["delete", "skip"]
 ZIP_ACTIONS = ["delete_zip", "delete_folder", "skip"]
+# "Delete only the shared files" is offered only when the LLM judged the folders to be copies.
+SHARED_DELETE_VERDICTS = ("identical", "copy_with_changes")
 
 
 class State(TypedDict):
@@ -47,6 +55,10 @@ class State(TypedDict):
     warnings: list[str]
     log: list[dict]
     summary: dict | None
+    # Folders that hold the only remaining copy of files deleted by "delete only shared files".
+    # They are never deleted as a whole folder (or as part of one) later in the run.
+    protected_paths: list[str]
+    shared_files_deleted: int
     # Full scan data, passed from scan to find_candidates in memory only.
     # It is large, so it is never written to the checkpoint.
     scan_result: Annotated[Any, UntrackedValue(object)]
@@ -75,6 +87,8 @@ def initial_state(roots: list[str], settings: dict | None = None) -> dict:
         "warnings": [],
         "log": [],
         "summary": None,
+        "protected_paths": [],
+        "shared_files_deleted": 0,
         "scan_result": None,
     }
 
@@ -103,6 +117,9 @@ def _recommendation_outcome(item: dict, decision: dict | None, judgement: dict |
         return ""
     if decision["action"] == "skip":
         return actions.OUTCOME_SKIPPED
+    if decision["action"] == "delete_shared":
+        # Followed if files were removed from a member the recommendation did not keep.
+        return actions.OUTCOME_OVERRIDDEN if decision["from"] in judgement["keep"] else actions.OUTCOME_FOLLOWED
     recommended = {m["path"] for m in item["members"] if m["id"] not in judgement["keep"]}
     if set(decision["paths"]) == recommended:
         return actions.OUTCOME_FOLLOWED
@@ -133,9 +150,20 @@ def _close_previous_item(state: State) -> list[dict]:
     return [row]
 
 
-def _sanitize_decision(item: dict, decision: Any) -> tuple[dict, str | None]:
+def shared_delete_allowed(item: dict, judgement: dict | None) -> bool:
+    return item["type"] == "duplicate" and judgement is not None and judgement["verdict"] in SHARED_DELETE_VERDICTS
+
+
+def _sanitize_decision(item: dict, decision: Any, judgement: dict | None = None) -> tuple[dict, str | None]:
     """Turn the resume value into a valid decision; anything invalid becomes skip."""
     action = decision.get("action") if isinstance(decision, dict) else None
+    if action == "delete_shared":
+        members = {m["id"]: m for m in item.get("members", [])}
+        source, keep_in = decision.get("from"), decision.get("keep_in")
+        if (shared_delete_allowed(item, judgement) and source in members and keep_in in members
+                and source != keep_in and keep_in in members[source].get("shared_with", {})):
+            return {"action": "delete_shared", "from": source, "keep_in": keep_in}, None
+        return {"action": "skip"}, "בקשה לא תקינה למחיקת קבצים משותפים, הפריט דולג"
     if item["type"] == "duplicate" and action == "delete":
         member_paths = [m["path"] for m in item["members"]]
         paths = [p for p in member_paths if p in decision.get("paths", [])]
@@ -204,14 +232,19 @@ def route_after_pick(state: State) -> str:
     item = state["current"]
     if item is None:
         # Deletions may have created new empty folders, so check the disk in that case too.
-        if state["empty_folders"] or state["deleted_paths"]:
+        if state["empty_folders"] or state["deleted_paths"] or state["shared_files_deleted"]:
             return "review_empty_folders"
         return "summary"
     return "judge" if item["type"] == "duplicate" else "human_review"
 
 
+def _for_llm(group: dict) -> dict:
+    """The group without the shared-file lists, which the LLM does not need (and traces stay small)."""
+    return {**group, "members": [{k: v for k, v in m.items() if k != "shared_with"} for m in group["members"]]}
+
+
 def judge(state: State) -> dict:
-    result = llm_judge.judge_with_details(state["current"])
+    result = llm_judge.judge_with_details(_for_llm(state["current"]))
     if result.judgement is not None:
         return {"judgement": result.judgement.model_dump()}
     warning = (f"{llm_judge.NO_RECOMMENDATION_MESSAGE} עבור קבוצה {state['current']['id']}: "
@@ -237,9 +270,13 @@ def human_review(state: State) -> dict:
             llm_judge.NO_RECOMMENDATION_MESSAGE if item["type"] == "duplicate" and judgement is None else None
         ),
         "low_confidence": judgement is not None and judgement["confidence"] < threshold,
-        "actions": DUPLICATE_ACTIONS if item["type"] == "duplicate" else ZIP_ACTIONS,
+        "actions": (
+            ZIP_ACTIONS if item["type"] == "zip"
+            else ["delete", "delete_shared", "skip"] if shared_delete_allowed(item, judgement)
+            else DUPLICATE_ACTIONS
+        ),
     }
-    decision, warning = _sanitize_decision(item, interrupt(payload))
+    decision, warning = _sanitize_decision(item, interrupt(payload), judgement)
     update = {"decision": decision}
     if warning:
         update["warnings"] = state["warnings"] + [warning]
@@ -260,8 +297,57 @@ def expand_children(state: State) -> dict:
     return {"queue": children + state["queue"]}
 
 
+def _protection_problem(path: str, protected_paths: list[str]) -> str | None:
+    """A protected folder holds the only remaining copy of deleted files: never delete it,
+    anything inside it, or a folder that contains it."""
+    for protected in protected_paths:
+        if scanner.is_within(path, protected) or scanner.is_within(protected, path):
+            return (f"לא נמחק: {path} מכיל את העותק היחיד שנשאר של קבצים שנמחקו קודם "
+                    f"(מחיקת קבצים משותפים בלבד)")
+    return None
+
+
+def _execute_shared(state: State) -> dict:
+    """Delete from one member only the files that have an identical copy in another member."""
+    item, decision, judgement = state["current"], state["decision"], state["judgement"]
+    members = {m["id"]: m for m in item["members"]}
+    source, keep_in = members[decision["from"]], members[decision["keep_in"]]
+    warnings = list(state["warnings"])
+    deleted_count, freed, skipped = 0, 0, []
+    for entry in source["shared_with"][keep_in["id"]]["files"]:
+        path = os.path.join(source["path"], entry["relative_path"])
+        copy_path = os.path.join(keep_in["path"], entry["other_relative_path"])
+        problem = (_protection_problem(path, state["protected_paths"])
+                   or actions.verify_shared_file(path, copy_path, entry["sha256"])
+                   or actions.move_to_recycle_bin(path))
+        if problem:
+            warnings.append(problem)
+            skipped.append(entry["relative_path"])
+        else:
+            deleted_count += 1
+            freed += entry["size_bytes"]
+    row = actions.make_log_row(
+        item["id"], item["type"], actions.ACTION_SHARED_DELETED, source["path"], freed, judgement,
+        "delete_shared", _recommendation_outcome(item, decision, judgement),
+        files_deleted=deleted_count, skipped_files=skipped,
+    )
+    actions.append_log([row])
+    protected = list(state["protected_paths"])
+    if deleted_count and keep_in["path"] not in protected:
+        protected.append(keep_in["path"])
+    return {
+        "freed_bytes": state["freed_bytes"] + freed,
+        "shared_files_deleted": state["shared_files_deleted"] + deleted_count,
+        "protected_paths": protected,
+        "warnings": warnings,
+        "log": state["log"] + [row],
+    }
+
+
 def execute(state: State) -> dict:
     item, decision, judgement = state["current"], state["decision"], state["judgement"]
+    if decision["action"] == "delete_shared":
+        return _execute_shared(state)
     outcome = _recommendation_outcome(item, decision, judgement)
     deleted_paths = list(state["deleted_paths"])
     freed_bytes = state["freed_bytes"]
@@ -269,7 +355,8 @@ def execute(state: State) -> dict:
     rows = []
     for target in _deletion_targets(item, decision):
         path = target["path"]
-        problem = actions.revalidate(path, target["size"], target["file_count"], target["is_file"])
+        problem = (_protection_problem(path, state["protected_paths"])
+                   or actions.revalidate(path, target["size"], target["file_count"], target["is_file"]))
         if problem is None:
             problem = actions.move_to_recycle_bin(path)
         if problem:
@@ -335,6 +422,7 @@ def summary(state: State) -> dict:
     return {"summary": {
         "reviewed": len(reviewed),
         "deleted": len(state["deleted_paths"]),
+        "shared_files_deleted": state["shared_files_deleted"],
         "skipped": len(skipped),
         "classified_different": len(different),
         "freed_bytes": state["freed_bytes"],
