@@ -21,6 +21,16 @@ def scan_result(root):
 
 @pytest.fixture(scope="module")
 def candidates(scan_result):
+    """Every group, including cross-project ones (most tests check detection itself)."""
+    return scanner.find_candidates(
+        scan_result, config.DEFAULT_OVERLAP_THRESHOLD, config.DEFAULT_MIN_FOLDER_SIZE_MB,
+        include_cross_project=True,
+    )
+
+
+@pytest.fixture(scope="module")
+def default_candidates(scan_result):
+    """What the user sees by default: cross-project groups are not shown."""
     return scanner.find_candidates(
         scan_result, config.DEFAULT_OVERLAP_THRESHOLD, config.DEFAULT_MIN_FOLDER_SIZE_MB
     )
@@ -59,14 +69,15 @@ NESTED_TOP = frozenset({r"06_nested\אתר", r"06_nested\אתר גיבוי"})
 NESTED_IMAGES = frozenset({r"06_nested\אתר\תמונות", r"06_nested\אתר גיבוי\תמונות"})
 CONTAINMENT_ONLY = frozenset({r"10_containment\מצגת", r"10_containment\מצגת - מורחבת"})
 LIBRARY_IN_PROJECTS = frozenset({r"11_projects\אתר בלוג\fontawesome", r"11_projects\אתר חנות\fontawesome"})
-
+SAME_PROJECT = frozenset({r"12_same_project\אתר משרד\lib\bootstrap", r"12_same_project\אתר משרד\lib\bootstrap - Copy"})
 
 def test_exactly_the_expected_top_level_groups(root, candidates):
     assert set(top_groups(root, candidates)) == {
         COPY_SUFFIX, THREE_COPIES, NEWER_COPY, SIMILAR_NAMES, DIFFERENT_NAMES, NESTED_TOP, CONTAINMENT_ONLY,
-        LIBRARY_IN_PROJECTS,
+        LIBRARY_IN_PROJECTS, SAME_PROJECT,
     }
-    assert len(candidates["queue"]) == 8 + 3  # 8 duplicate groups + 3 ZIP items
+    assert len(candidates["queue"]) == 9 + 3  # 9 duplicate groups + 3 ZIP items
+    assert candidates["skipped_cross_project"] == 0
 
 
 def test_library_in_two_projects_reports_each_project(root, candidates):

@@ -47,6 +47,7 @@ class State(TypedDict):
     warnings: list[str]
     log: list[dict]
     summary: dict | None
+    skipped_cross_project: int  # Groups not shown because their members are in different projects
     # Full scan data, passed from scan to find_candidates in memory only.
     # It is large, so it is never written to the checkpoint.
     scan_result: Annotated[Any, UntrackedValue(object)]
@@ -57,6 +58,8 @@ def default_settings() -> dict:
         "overlap_threshold": config.DEFAULT_OVERLAP_THRESHOLD,
         "min_folder_size_mb": config.DEFAULT_MIN_FOLDER_SIZE_MB,
         "confidence_threshold": config.DEFAULT_CONFIDENCE_THRESHOLD,
+        # Duplicates whose members are all in different projects are hidden unless this is on.
+        "include_cross_project": False,
     }
 
 
@@ -75,6 +78,7 @@ def initial_state(roots: list[str], settings: dict | None = None) -> dict:
         "warnings": [],
         "log": [],
         "summary": None,
+        "skipped_cross_project": 0,
         "scan_result": None,
     }
 
@@ -174,12 +178,14 @@ def find_candidates(state: State) -> dict:
     scan_result = state.get("scan_result") or scanner.scan(state["roots"])
     settings = state["settings"]
     candidates = scanner.find_candidates(
-        scan_result, settings["overlap_threshold"], settings["min_folder_size_mb"]
+        scan_result, settings["overlap_threshold"], settings["min_folder_size_mb"],
+        include_cross_project=settings.get("include_cross_project", False),
     )
     return {
         "queue": candidates["queue"],
         "hidden_children": candidates["hidden_children"],
         "empty_folders": candidates["empty_folders"],
+        "skipped_cross_project": candidates["skipped_cross_project"],
         "warnings": state["warnings"] + scan_result.warnings,
         "scan_result": None,
     }
@@ -337,6 +343,7 @@ def summary(state: State) -> dict:
         "deleted": len(state["deleted_paths"]),
         "skipped": len(skipped),
         "classified_different": len(different),
+        "skipped_cross_project": state.get("skipped_cross_project", 0),
         "freed_bytes": state["freed_bytes"],
         "warnings": state["warnings"],
         "log_file": config.ACTIONS_LOG_PATH,

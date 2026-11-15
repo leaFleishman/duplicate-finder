@@ -135,6 +135,7 @@ def request_start(token: str) -> None:
         "overlap_threshold": st.session_state.overlap_threshold,
         "min_folder_size_mb": st.session_state.min_folder_size_mb,
         "confidence_threshold": st.session_state.confidence_threshold,
+        "include_cross_project": st.session_state.get("include_cross_project", False),
     }}
 
 
@@ -197,6 +198,9 @@ def sidebar() -> None:
                   key="min_folder_size_mb")
         st.slider("סף ביטחון", 0.0, 1.0, config.DEFAULT_CONFIDENCE_THRESHOLD, 0.05,
                   key="confidence_threshold")
+        st.checkbox("הצג גם כפילויות בין פרויקטים שונים", value=False, key="include_cross_project",
+                    help="ספרייה שהועתקה לשני פרויקטים (למשל css או fontawesome) נחוצה בשניהם, "
+                         "ולכן קבוצות כאלה לא מוצגות כברירת מחדל.")
         st.session_state.setdefault("start_token", uuid.uuid4().hex)
         st.button("התחל סריקה", type="primary", on_click=request_start,
                   args=(st.session_state.start_token,), key="start_button", use_container_width=True)
@@ -323,6 +327,9 @@ def summary_card(summary: dict) -> None:
     columns[2].metric("דולגו", summary["skipped"])
     columns[3].metric("סווגו כשונים", summary["classified_different"])
     columns[4].metric("מקום שהתפנה", ltr(format_size(summary["freed_bytes"])))
+    if summary.get("skipped_cross_project"):
+        st.caption(f"קבוצות כפילות בין פרויקטים שונים שלא הוצגו: {ltr(str(summary['skipped_cross_project']))} "
+                   "(אפשר להציג אותן בתיבת הסימון בסרגל הצד)")
     if summary["warnings"]:
         with st.expander(f"אזהרות ({len(summary['warnings'])})", expanded=True):
             st.markdown(html_list([html.escape(w) for w in summary["warnings"]]), unsafe_allow_html=True)

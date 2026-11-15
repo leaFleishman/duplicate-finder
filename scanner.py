@@ -263,13 +263,72 @@ def _aggregate(result: ScanResult) -> None:
 # ------------------------------------------------------------- Candidates
 
 
-def find_candidates(scan_result: ScanResult, overlap_threshold: float, min_folder_size_mb: float) -> dict:
+def find_candidates(
+    scan_result: ScanResult,
+    overlap_threshold: float,
+    min_folder_size_mb: float,
+    include_cross_project: bool = False,
+) -> dict:
     groups, hidden_children = find_duplicate_groups(scan_result, overlap_threshold, min_folder_size_mb)
+    skipped = 0
+    if not include_cross_project:
+        groups, hidden_children, skipped = drop_cross_project(groups, hidden_children)
     return {
         "queue": groups + find_zip_items(scan_result),
         "hidden_children": hidden_children,
-        "empty_folders": find_empty_folders(scan_result),
+        "empty_folders": find_empty_folders(scan_result),  # Independent of the group filtering
+        "skipped_cross_project": skipped,
     }
+
+
+def is_cross_project(group: dict) -> bool:
+    """True if every member is inside a project and no two members share a project."""
+    projects = [m.get("project") for m in group["members"]]
+    if not all(projects):
+        return False
+    normalized = {os.path.normcase(p) for p in projects}
+    return len(normalized) == len(projects)
+
+
+def drop_cross_project(groups: list[dict], hidden_children: dict) -> tuple[list[dict], dict, int]:
+    """Remove cross-project groups (a library copied into two projects is needed in both).
+
+    Hidden groups of a removed group that are not cross-project themselves move up to take its
+    place, so no shown content disappears. Returns (groups, hidden_children, number removed).
+    """
+    skipped = 0
+
+    def visible(children: list[dict]) -> list[dict]:
+        nonlocal skipped
+        result = []
+        for child in children:
+            if is_cross_project(child):
+                skipped += 1
+                result.extend(visible(hidden_children.get(child["id"], [])))
+            else:
+                result.append(child)
+        return result
+
+    top_level = []
+    for group in groups:
+        if is_cross_project(group):
+            skipped += 1
+            top_level.extend(visible(hidden_children.get(group["id"], [])))
+        else:
+            top_level.append(group)
+    kept_hidden = {}
+    for parent_id, children in hidden_children.items():
+        parent = next((c for c in _all_groups(groups, hidden_children) if c["id"] == parent_id), None)
+        if parent is None or is_cross_project(parent):
+            continue
+        remaining = visible(children)
+        if remaining:
+            kept_hidden[parent_id] = remaining
+    return top_level, kept_hidden, skipped
+
+
+def _all_groups(groups: list[dict], hidden_children: dict) -> list[dict]:
+    return groups + [child for children in hidden_children.values() for child in children]
 
 
 # ------------------------------------------------------ Duplicate folders

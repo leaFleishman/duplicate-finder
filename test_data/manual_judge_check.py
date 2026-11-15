@@ -40,7 +40,8 @@ def main() -> None:
     root = create_fixtures(tempfile.mkdtemp(prefix="duplicate_finder_"))
     result = scanner.scan([root])
     candidates = scanner.find_candidates(
-        result, config.DEFAULT_OVERLAP_THRESHOLD, config.DEFAULT_MIN_FOLDER_SIZE_MB
+        result, config.DEFAULT_OVERLAP_THRESHOLD, config.DEFAULT_MIN_FOLDER_SIZE_MB,
+        include_cross_project=True,  # Also judge case 11 (a library in two projects)
     )
     groups = [item for item in candidates["queue"] if item["type"] == "duplicate"]
 

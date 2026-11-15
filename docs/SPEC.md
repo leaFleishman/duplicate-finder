@@ -48,6 +48,7 @@ config.py
 - DEFAULT_MIN_FOLDER_SIZE_MB = 1
 - DEFAULT_CONFIDENCE_THRESHOLD = 0.7
 - MAX_UNIQUE_FILES_TO_LLM = 20
+- Settings (per run, from the sidebar): overlap_threshold, min_folder_size_mb, confidence_threshold, include_cross_project (default False).
 - PROMPT_VERSION = "v3" (can be changed to "v1" or "v2"). v3 was chosen as the default after the experiments; see "Prompt Versions".
 - GEMINI_MODEL
 - CHECKPOINT_DB_PATH and ACTIONS_LOG_PATH: relative to the project folder, regardless of the working directory.
@@ -77,6 +78,13 @@ Project Detection
 - For each group member, find the nearest ancestor folder (not the member itself) that directly contains a project marker file: any .html, .htm, .csproj or .sln file, or a file named package.json or requirements.txt.
 - Store its path in the member's "project" field (None if there is none). Pass it to the LLM (v2 and v3) and show it in the interface ("פרויקט" column in the CLI and Streamlit).
 - Reason: identical library folders (for example css or fontawesome) inside two different projects are both needed; deleting one breaks that project. This case was discovered only in real use.
+Cross-Project Groups (hidden by default)
+- A duplicate group is cross-project if every member is inside a project and no two members share a project (project paths compared case-insensitively).
+- Cross-project groups are not shown by default, at any level (top-level groups and hidden_children). They are shown when the setting include_cross_project is on (sidebar checkbox "הצג גם כפילויות בין פרויקטים שונים", off by default; CLI flag --include-cross-project).
+- A group where at least two members are in the same project, or at least one member is not in a project, is shown as usual.
+- If a removed group had hidden groups that are not cross-project, they move up and take its place, so no other content disappears.
+- The number of groups not shown for this reason (at every level) is kept in state.skipped_cross_project and shown on the summary screen.
+- The filter applies only to duplicate groups. ZIP items and empty folders are not affected: the empty-folder list is computed from the scan independently (and recomputed from disk in review_empty_folders), so a folder that contains files is never listed as empty.
 Show Only the Top-Level Group
 - Hide a group if each of its members is located inside a member of another candidate group. Store these hidden groups separately (hidden_children), associated with their parent group, so they can be revealed if the user skips the top-level group.
 Extracted ZIP Files
@@ -135,7 +143,7 @@ The Graph (graph.py)
 State
 class State(TypedDict):
     roots: list[str]
-    settings: dict                 # overlap_threshold, min_folder_size_mb, confidence_threshold
+    settings: dict                 # overlap_threshold, min_folder_size_mb, confidence_threshold, include_cross_project
     queue: list[dict]              # Pending items: {"id", "type": "duplicate"|"zip", ...}
     hidden_children: dict          # group_id -> list of hidden groups
     empty_folders: list[str]
@@ -147,13 +155,14 @@ class State(TypedDict):
     warnings: list[str]
     log: list[dict]
     summary: dict | None           # Set by the summary node
+    skipped_cross_project: int     # Groups not shown because all members are in different projects
     scan_result: Annotated[Any, UntrackedValue(object)]
                                    # Full scan data passed from scan to find_candidates in memory only;
                                    # it is large and never written to the checkpoint. If a run resumes
                                    # between these two nodes, find_candidates scans again.
 Nodes and Flow
 1. scan: Scan and build the data structures.
-2. find_candidates: Build the queue (top-level duplicate groups and ZIP items) and the empty-folder list.
+2. find_candidates: Build the queue (top-level duplicate groups and ZIP items) and the empty-folder list. Unless include_cross_project is on, remove cross-project groups and count them.
 3. pick_next: First, close the previous item: if it ended without execute (a skip, or a group classified as different), write its log row here, because human_review must not write anything. Then remove the next item from the queue. Skip items if any of their paths has been deleted or is located inside a deleted path.
 4. Routing after pick_next:
    - Queue empty and empty folders exist (or something was deleted, which may have created new empty folders): review_empty_folders.
@@ -176,7 +185,7 @@ Nodes and Flow
 9. expand_children: Add the hidden groups to the front of the queue so they are displayed immediately, then proceed to pick_next.
 10. execute: For each path, recheck that it still exists and that its size and file count have not changed since the scan. If anything has changed, do not delete it and display a warning. Otherwise, call send2trash, update deleted_paths and freed_bytes, and record a log entry. Then proceed to pick_next.
 11. review_empty_folders: A single interrupt containing all empty folders. Resume value: {"delete": [...paths]}. Delete the selected folders after rechecking that they are still empty, then proceed to summary.
-12. summary: Counts of items reviewed, deleted, and skipped; space freed; warnings.
+12. summary: Counts of items reviewed, deleted, and skipped; space freed; warnings; the number of cross-project groups not shown.
 Checkpointer
 Use SqliteSaver with a local file (checkpoints.sqlite) so that a workflow can be resumed after restarting Streamlit.
 Every graph invocation is sent with metadata {"thread_id": ...}, so a run and its later resumes are grouped together in the LangSmith Threads view. The recursion limit is raised (10,000) because the review loop can run many steps between interrupts.
@@ -193,6 +202,7 @@ Streamlit Interface (app.py)
   - A text box for paths, one path per line. Validate that each path exists, is a folder, and is not on the skip list. Display a clear error message otherwise.
   - Brief instructions for copying a path from File Explorer.
   - Sliders: overlap threshold, minimum folder size, confidence threshold.
+  - A checkbox "הצג גם כפילויות בין פרויקטים שונים" ("Also show duplicates between different projects"), off by default.
   - A "התחל סריקה" ("Start scan") button.
   - A "thread ID" field with a "המשך" ("Continue") button, to resume a previous run (like cli.py --thread).
 - Store the graph, thread_id, and current state in st.session_state. The thread_id is also kept in the URL (?thread=...), so a page refresh returns to the same run. Resume with Command(resume=...) on each decision-button click.
@@ -206,7 +216,7 @@ Streamlit Interface (app.py)
   - Checkboxes for selecting members to delete (none checked by default), and buttons "מחק את המסומנים" ("Delete selected") and "דלג" ("Skip"). Do not allow deletion of every member of a group.
 - ZIP card: ZIP path and folder path, sizes, whether extraction is complete, and a list of missing files if extraction is partial, with a warning. No recommendation. Buttons: "מחק את ה-ZIP" ("Delete ZIP"), "מחק את התיקייה" ("Delete folder"), and "דלג" ("Skip").
 - Empty folders screen: A list with a checkbox for each folder, buttons "בחר הכל" ("Select all") and "נקה הכל" ("Clear all"), and a "מחק את המסומנות" ("Delete selected") button.
-- Summary screen: Include a link to the log file.
+- Summary screen: Include a link to the log file, and the number of cross-project groups that were not shown (when there were any).
 - The interface must be in Hebrew and use right-to-left (RTL) layout. Tables and lists are HTML (st.dataframe does not support RTL). Left-to-right values inside Hebrew text (sizes such as "1.25 MB", IDs, paths) are isolated with <bdi> in HTML and with Unicode isolate marks in plain-text labels, so they are not reordered.
 cli.py
 Run the same graph in the terminal: accept paths, print each item, and read decisions from the keyboard. Intended for debugging before implementing Streamlit.
@@ -223,7 +233,8 @@ A script that creates a directory structure under a temporary folder with these 
 - A folder on the skip list containing duplicates, to verify that it is not scanned, and a hidden folder with a copy of another case, to verify that hidden folders are not scanned.
 - Hebrew names.
 - A copy with the same 3 files plus 4 new ones (Jaccard about 0.43, containment 1.0), detected only thanks to containment (case 10).
-- The same library folder (fontawesome) inside two different website projects (case 11), to verify project detection.
+- The same library folder (fontawesome) inside two different website projects (case 11), to verify project detection. It is hidden by default and shown when include_cross_project is on.
+- Two identical copies of a library inside the same project (case 12), which must still be shown by default.
 - The script takes an optional target folder (python test_data\make_fixtures.py C:\demo) and never overwrites an existing fixtures folder.
 LangSmith Evaluation (eval/)
 - Evaluation scope: Only the judge function (input: group data; output: Judgement). Do not evaluate the entire graph or real folders.

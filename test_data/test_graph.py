@@ -38,9 +38,10 @@ def env(tmp_path, monkeypatch):
     return {"root": root, "trashed": trashed, "log": str(tmp_path / "log.csv")}
 
 
-def start(app, root, thread="t1"):
+def start(app, root, thread="t1", include_cross_project=False):
     cfg = graph.thread_config(thread)
-    app.invoke(graph.initial_state([root]), cfg)
+    settings = {**graph.default_settings(), "include_cross_project": include_cross_project}
+    app.invoke(graph.initial_state([root], settings), cfg)
     return cfg
 
 
@@ -71,7 +72,8 @@ def names(payload):
 
 def test_full_run(env):
     app = graph.build_graph(InMemorySaver())
-    cfg = start(app, env["root"])
+    # The nested images in case 06 are inside two site projects, so show cross-project groups here.
+    cfg = start(app, env["root"], include_cross_project=True)
     copy_path = os.path.join(env["root"], "01_copy_suffix", "מסמכים - עותק")
 
     def decide(payload):
