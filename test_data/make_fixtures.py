@@ -187,6 +187,13 @@ def create_fixtures(target_dir: str) -> str:
         })
         _write_files(os.path.join(case, project, "fontawesome"), library)
 
+    # 12. Two identical copies of a library inside the same project (one can be deleted).
+    case = os.path.join(root, "12_same_project", "אתר משרד")
+    _write_files(case, {"index.html": ("office-index", 22 * KB), "app.js": ("office-app", 70 * KB)})
+    bootstrap = {"bootstrap.min.css": ("bs-1", 550 * KB), "bootstrap.min.js": ("bs-2", 560 * KB)}
+    for name in ("bootstrap", "bootstrap - Copy"):
+        _write_files(os.path.join(case, "lib", name), bootstrap)
+
     return root
 
 

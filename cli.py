@@ -156,6 +156,11 @@ def print_summary(summary: dict) -> None:
     print(f"  נמחקו (לסל המחזור): {summary['deleted']}")
     print(f"  דולגו: {summary['skipped']}")
     print(f"  סווגו כשונים: {summary['classified_different']}")
+    if summary.get("shared_files_deleted"):
+        print(f"  קבצים משותפים שנמחקו (בלי התיקייה): {summary['shared_files_deleted']}")
+    if summary.get("skipped_cross_project"):
+        print(f"  קבוצות בין פרויקטים שונים שלא הוצגו: {summary['skipped_cross_project']} "
+              "(להצגה: --include-cross-project)")
     print(f"  מקום שהתפנה: {format_size(summary['freed_bytes'])}")
     print(f"  אזהרות ({len(summary['warnings'])}):")
     for warning in summary["warnings"]:
@@ -186,6 +191,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="איתור תיקיות כפולות (מצב טרמינל)")
     parser.add_argument("paths", nargs="*", help="תיקיות לסריקה")
     parser.add_argument("--thread", help="מזהה הרצה קיימת להמשך")
+    parser.add_argument("--include-cross-project", action="store_true",
+                        help="הצג גם כפילויות שכל החברים בהן בפרויקטים שונים")
     args = parser.parse_args()
 
     app = graph.build_graph(graph.open_checkpointer())
@@ -200,7 +207,8 @@ def main() -> None:
         if errors:
             sys.exit("\n".join(errors))
         thread_id = uuid.uuid4().hex[:8]
-        start_input = graph.initial_state(args.paths)
+        settings = {**graph.default_settings(), "include_cross_project": args.include_cross_project}
+        start_input = graph.initial_state(args.paths, settings)
 
     print(f"מזהה הרצה: {thread_id}  (להמשך אחרי עצירה: python cli.py --thread {thread_id})")
     try:
