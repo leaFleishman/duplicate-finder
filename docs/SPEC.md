@@ -21,27 +21,36 @@ Project Structure
 duplicate-finder/
 ├── config.py          # Constants and defaults
 ├── scanner.py         # Scanning, hashing, candidate detection, ZIPs, empty folders
-├── llm_judge.py       # Pydantic model, two prompt versions, Gemini invocation
+├── llm_judge.py       # Pydantic schemas, three prompt versions (v1, v2, v3), Gemini invocation, retry and failure types
 ├── graph.py           # State, nodes, routing, interrupt, checkpointer
 ├── actions.py         # Revalidation, moving to the Recycle Bin, action logging
 ├── app.py             # Streamlit interface
 ├── cli.py             # Terminal execution for debugging
 ├── eval/
 │   ├── make_dataset.py
+│   ├── dataset.json   # The examples, saved for review before uploading
 │   ├── evaluators.py
 │   └── run_experiment.py
 ├── test_data/
-│   └── make_fixtures.py
+│   ├── make_fixtures.py
+│   ├── manual_judge_check.py   # Runs judge on the fixture groups with every prompt version
+│   └── test_*.py      # pytest tests (no API calls, no real Recycle Bin)
+├── docs/
+│   ├── SPEC.md        # This document
+│   ├── findings.md    # Findings from development, the basis for the README insights
+│   └── images/        # Screenshots used in the README
 ├── logs/              # Action log (actions_log.csv)
 └── README.md
 config.py
-- SKIP_DIR_NAMES: Windows, Program Files, Program Files (x86), ProgramData, $Recycle.Bin, System Volume Information, AppData, .git, .svn, .vs, .idea, .vscode, node_modules, bin, obj, venv, .venv, pycache.
+- SKIP_DIR_NAMES: Windows, Program Files, Program Files (x86), ProgramData, $Recycle.Bin, System Volume Information, AppData, .git, .svn, .vs, .idea, .vscode, node_modules, bin, obj, venv, .venv, __pycache__.
+- PROJECT_MARKER_NAMES = {"package.json", "requirements.txt"} and PROJECT_MARKER_EXTENSIONS = {".html", ".htm", ".csproj", ".sln"}: files that mark a project root (see "Project Detection").
 - DEFAULT_OVERLAP_THRESHOLD = 0.7: Minimum overlap for a pair to qualify as a candidate.
 - DEFAULT_MIN_FOLDER_SIZE_MB = 1
 - DEFAULT_CONFIDENCE_THRESHOLD = 0.7
 - MAX_UNIQUE_FILES_TO_LLM = 20
-- PROMPT_VERSION = "v2" (can be changed to "v1")
+- PROMPT_VERSION = "v3" (can be changed to "v1" or "v2"). v3 was chosen as the default after the experiments; see "Prompt Versions".
 - GEMINI_MODEL
+- CHECKPOINT_DB_PATH and ACTIONS_LOG_PATH: relative to the project folder, regardless of the working directory.
 Scanning (scanner.py), Without an LLM
 - Scan using os.scandir or os.walk, without following shortcuts, symlinks, or junctions.
 - Skip:
@@ -63,16 +72,22 @@ Groups
 - Completely identical folders (overlap 1.0) are merged into a single group, which may contain more than two copies.
 - Pairs with overlap between the threshold and 1.0 form two-member groups.
 - For each group, calculate the overlap percentage and, for each member, a list of unique files (files not present in any other member of the group), including relative paths and sizes.
+- A folder that contains nothing except a single subfolder with the same content (for example "X\X") is represented by the outer folder only, so the same content never appears twice in one group.
+Project Detection
+- For each group member, find the nearest ancestor folder (not the member itself) that directly contains a project marker file: any .html, .htm, .csproj or .sln file, or a file named package.json or requirements.txt.
+- Store its path in the member's "project" field (None if there is none). Pass it to the LLM (v2 and v3) and show it in the interface ("פרויקט" column in the CLI and Streamlit).
+- Reason: identical library folders (for example css or fontawesome) inside two different projects are both needed; deleting one breaks that project. This case was discovered only in real use.
 Show Only the Top-Level Group
 - Hide a group if each of its members is located inside a member of another candidate group. Store these hidden groups separately (hidden_children), associated with their parent group, so they can be revealed if the user skips the top-level group.
 Extracted ZIP Files
-- For each .zip file, check whether a folder with the same name as the ZIP filename without its extension exists in the same directory or in an adjacent directory.
+- For each .zip file, check whether a folder with the same name as the ZIP filename without its extension exists in the same directory (see clarification 5).
 - Compare the archive's file list (zipfile, relative paths and uncompressed sizes) with the folder's contents.
 - Fully extracted: all files exist. Partially extracted: some files exist; retain the list of missing files. If none of the files exist, the item is not a candidate.
 - Corrupted or password-protected ZIP files: skip and record a warning.
 Empty Folders
 - An empty folder is a folder with no files at any depth, including a folder that contains only empty folders.
-- Show only the highest empty folder in each branch.
+- A folder that contains a hidden file, a cloud-only file, a link, or a skipped subfolder is not empty (so that deleting it never removes content the scan did not see).
+- Show only the highest empty folder in each branch. A scan root is never listed.
 The LLM (llm_judge.py)
 Run the LLM only on duplicate groups. Do not run it on ZIP files or empty folders.
 Structured Output (Pydantic)
@@ -82,21 +97,40 @@ class Judgement(BaseModel):
     keep: list[str]            # IDs of members recommended for retention;
                                # empty if verdict == "different"
     reason: str                # Short explanation in Hebrew, 1–3 sentences
-Validation: every ID in keep must identify an existing member of the group.
+v3 output schema (same fields, reason before keep, so the model explains before it chooses):
+class JudgementReasonFirst(BaseModel):
+    verdict: Literal["identical", "copy_with_changes", "different"]
+    confidence: float
+    reason: str
+    keep: list[str]
+The v3 output is converted to Judgement after parsing, so the rest of the system uses a single type. v1 and v2 use Judgement directly (keep before reason).
+Validation (all versions):
+- verdict is one of the three values, and confidence is between 0 and 1 (enforced by Pydantic).
+- Every ID in keep must identify an existing member of the group.
+- keep must be empty if verdict == "different", and must not be empty otherwise.
 Input to the LLM
-For each group member: ID (A, B, C, ...), folder name, full path, size, file count, latest modification date, and up to MAX_UNIQUE_FILES_TO_LLM unique files (relative paths and sizes), together with the total number of unique files. Also include the group's overlap percentage. Do not send file contents; send only names and metadata.
-Two Prompt Versions (for the Before-and-After Experiment)
+For each group member: ID (A, B, C, ...), folder name, full path, size, file count, latest modification date, and up to MAX_UNIQUE_FILES_TO_LLM unique files (relative paths and sizes), together with the total number of unique files. Also include the group's overlap percentage (Jaccard and containment). In v2 and v3, also include the common location of all members, the distinct part of each member's path, and the member's project ("inside project", or "none"). Do not send file contents; send only names and metadata.
+Prompt Versions (for the Before-and-After Experiments)
+All versions share the same task description and the meaning of each output field. The differences are only in the information and the criteria.
 - v1 (baseline): The model receives only folder names and paths. Instruction: "Are these copies of the same folder, and which one should be kept?"
-- v2 (improved): All the input described above, plus explicit criteria:
+- v2 (full context): All the input described above, plus explicit criteria:
   - Names such as "- עותק" ("- Copy"), "- Copy", "Copy of", "(2)", "_old", "גיבוי" ("backup"), and "ישן" ("old") suggest a copy, but are not conclusive. The name alone is insufficient.
   - A copy is not always the redundant version. If it contains newer unique files, it may be the most up-to-date version.
   - Similar names with different content, such as "דוח 2024" ("Report 2024") and "דוח 2025" ("Report 2025"), should be classified as different.
-  - Prefer retaining a copy in an organized location, such as Documents or Projects, over a temporary location, such as Downloads or Desktop. The location is judged only by the part of the path that differs between members: the code computes the common prefix of the member paths and sends it, together with each member's distinct path part, to the LLM (v2 only). Explicit instruction: "אם שתי התיקיות נמצאות באותו סוג מיקום, המיקום אינו שיקול" ("If both folders are in the same kind of location, location is not a consideration").
+  - Prefer retaining a copy in an organized location, such as Documents or Projects, over a temporary location, such as Downloads or Desktop. The location is judged only by the part of the path that differs between members: the code computes the common prefix of the member paths (component by component, case-insensitive) and sends it, together with each member's distinct path part, to the LLM (v2 and v3). Explicit instruction: "אם שתי התיקיות נמצאות באותו סוג מיקום, המיקום אינו שיקול" ("If both folders are in the same kind of location, location is not a consideration").
   - For a copy_with_changes group, explain which unique files would be lost if either side were deleted.
   - Assign low confidence when the indicators conflict.
+  - If members are inside different projects, each project may need its own copy: keep every member, give low confidence (below 0.5), and say so in the reason.
+- v3 (default): Identical to v2, with exactly two changes:
+  - The output schema is JudgementReasonFirst (reason before keep).
+  - An added instruction: the reason must explicitly name the IDs to keep and to delete, for example "לשמור את A, למחוק את B" ("keep A, delete B").
+  - Why v3 is the default although its accuracy is similar to v2: in v2 the reason and keep could contradict each other (dataset example 15: the reason says to keep the folder in Documents, keep points to the one in Downloads, confidence 1.0). In v3 the reason names the IDs, so it can be checked against keep, and no contradiction was found. In addition, the case where v2 silently skipped a group ("different" used to mean "keep both") became a visible validation failure in v3, so the group is shown to the user without a recommendation instead of being skipped. The full analysis is in docs/findings.md (finding D).
 Failure Handling
-- On a connection failure (network, API key, quota, or timeout) or invalid output, retry once.
-- If the retry also fails, return None. Display the item without a recommendation and with the message "לא התקבלה המלצה מהמערכת" ("No recommendation was received from the system").
+- On a connection failure (network, API key, quota, or timeout) or invalid output, retry once. The model's built-in retries are disabled (max_retries=0) so that exactly one retry happens; each call has a 60-second timeout.
+- Classify each failed attempt into one of: timeout, quota, auth, connection, invalid_output, other. Log the category and the exception type in the warning.
+- judge(group, prompt_version=None) returns Judgement or None. judge_with_details(...) also returns the list of failures ("category: ExceptionName" per failed attempt).
+- If the retry also fails, return None. Display the item without a recommendation and with the message "לא התקבלה המלצה מהמערכת" ("No recommendation was received from the system"), and add a Hebrew warning to the run that names the failure type of the last attempt.
+- Every judge call is traced to LangSmith as "judge", tagged prompt-v1 / prompt-v2 / prompt-v3, with prompt_version in its metadata. The code never enables or disables tracing itself; that is controlled only by LANGSMITH_TRACING in .env.
 The Graph (graph.py)
 State
 class State(TypedDict):
@@ -112,16 +146,21 @@ class State(TypedDict):
     freed_bytes: int
     warnings: list[str]
     log: list[dict]
+    summary: dict | None           # Set by the summary node
+    scan_result: Annotated[Any, UntrackedValue(object)]
+                                   # Full scan data passed from scan to find_candidates in memory only;
+                                   # it is large and never written to the checkpoint. If a run resumes
+                                   # between these two nodes, find_candidates scans again.
 Nodes and Flow
 1. scan: Scan and build the data structures.
 2. find_candidates: Build the queue (top-level duplicate groups and ZIP items) and the empty-folder list.
-3. pick_next: Remove the next item from the queue. Skip items if any of their paths has been deleted or is located inside a deleted path.
+3. pick_next: First, close the previous item: if it ended without execute (a skip, or a group classified as different), write its log row here, because human_review must not write anything. Then remove the next item from the queue. Skip items if any of their paths has been deleted or is located inside a deleted path.
 4. Routing after pick_next:
-   - Queue empty and empty folders exist: review_empty_folders.
+   - Queue empty and empty folders exist (or something was deleted, which may have created new empty folders): review_empty_folders.
    - Queue empty and no empty folders exist: summary.
    - Duplicate item: judge.
    - ZIP item: human_review.
-5. judge: Invoke the LLM.
+5. judge: Invoke the LLM (judge_with_details with PROMPT_VERSION). If there is no recommendation, add a warning with the failure type.
 6. Routing after judge:
    - verdict == "different": Return to pick_next and log "סווג כשונה" ("Classified as different").
    - Otherwise: human_review.
@@ -129,6 +168,7 @@ Nodes and Flow
    Resume values:
    - Duplicate: {"action": "delete", "paths": [...]} or {"action": "skip"}.
    - ZIP: {"action": "delete_zip"}, {"action": "delete_folder"}, or {"action": "skip"}.
+   An invalid resume value (unknown paths, deleting every member, or deleting none) becomes a skip with a warning.
 8. Routing after human_review:
    - Delete: execute.
    - Skip a duplicate group that has hidden_children: expand_children.
@@ -139,6 +179,7 @@ Nodes and Flow
 12. summary: Counts of items reviewed, deleted, and skipped; space freed; warnings.
 Checkpointer
 Use SqliteSaver with a local file (checkpoints.sqlite) so that a workflow can be resumed after restarting Streamlit.
+Every graph invocation is sent with metadata {"thread_id": ...}, so a run and its later resumes are grouped together in the LangSmith Threads view. The recursion limit is raised (10,000) because the review loop can run many steps between interrupts.
 Action Log (actions.py)
 Append one row for every decision to logs/actions_log.csv, with these columns: timestamp, item_type, action, path, size_bytes, llm_verdict, llm_keep, llm_confidence, user_decision, recommendation_outcome.
 recommendation_outcome values:
@@ -146,24 +187,27 @@ recommendation_outcome values:
 - overridden: different members were deleted than recommended.
 - skipped: the user skipped a group that had a recommendation.
 - empty: there was no recommendation (ZIP items, empty folders, LLM failure), or there was no user decision (an item classified as different).
+- The log file is written with a UTF-8 BOM so that Excel shows Hebrew correctly. It contains real, private paths and is excluded from git, together with checkpoints.sqlite.
 Streamlit Interface (app.py)
 - Sidebar:
   - A text box for paths, one path per line. Validate that each path exists, is a folder, and is not on the skip list. Display a clear error message otherwise.
   - Brief instructions for copying a path from File Explorer.
   - Sliders: overlap threshold, minimum folder size, confidence threshold.
   - A "התחל סריקה" ("Start scan") button.
-- Store the graph, thread_id, and current state in st.session_state. Resume with Command(resume=...) on each decision-button click.
+  - A "thread ID" field with a "המשך" ("Continue") button, to resume a previous run (like cli.py --thread).
+- Store the graph, thread_id, and current state in st.session_state. The thread_id is also kept in the URL (?thread=...), so a page refresh returns to the same run. Resume with Command(resume=...) on each decision-button click.
+- No double resume: every decision button carries the id of the interrupt it was rendered for. Before resuming, the pending interrupt in the checkpoint is checked under a lock; a double click, a refresh, or a stale page does nothing. The "Start scan" button uses a one-time token.
 - During scanning: display a progress message.
 - Duplicate item card:
-  - A table of group members: path, size, file count, modification date.
+  - A table of group members: path, size, file count, modification date, project.
   - Overlap percentage.
   - The recommendation and explanation, with a prominent banner saying "המערכת לא בטוחה, כדאי לבדוק" ("The system is uncertain; please review") if confidence is below the threshold.
   - For each member with unique files, show an expandable list and the warning "קבצים אלה יימחקו אם תמחקי תיקייה זו" ("These files will be deleted if you delete this folder").
-  - Checkboxes for selecting members to delete, and buttons "מחק את המסומנים" ("Delete selected") and "דלג" ("Skip"). Do not allow deletion of every member of a group.
+  - Checkboxes for selecting members to delete (none checked by default), and buttons "מחק את המסומנים" ("Delete selected") and "דלג" ("Skip"). Do not allow deletion of every member of a group.
 - ZIP card: ZIP path and folder path, sizes, whether extraction is complete, and a list of missing files if extraction is partial, with a warning. No recommendation. Buttons: "מחק את ה-ZIP" ("Delete ZIP"), "מחק את התיקייה" ("Delete folder"), and "דלג" ("Skip").
 - Empty folders screen: A list with a checkbox for each folder, buttons "בחר הכל" ("Select all") and "נקה הכל" ("Clear all"), and a "מחק את המסומנות" ("Delete selected") button.
 - Summary screen: Include a link to the log file.
-- The interface must be in Hebrew and use right-to-left (RTL) layout.
+- The interface must be in Hebrew and use right-to-left (RTL) layout. Tables and lists are HTML (st.dataframe does not support RTL). Left-to-right values inside Hebrew text (sizes such as "1.25 MB", IDs, paths) are isolated with <bdi> in HTML and with Unicode isolate marks in plain-text labels, so they are not reordered.
 cli.py
 Run the same graph in the terminal: accept paths, print each item, and read decisions from the keyboard. Intended for debugging before implementing Streamlit.
 Test Folders (test_data/make_fixtures.py)
@@ -176,19 +220,23 @@ A script that creates a directory structure under a temporary folder with these 
 - A duplicate top-level pair that also contains duplicate subfolders.
 - A fully extracted ZIP, a partially extracted ZIP, and a ZIP without an extracted folder.
 - Empty folders, including a folder containing only empty folders.
-- A folder on the skip list containing duplicates, to verify that it is not scanned.
+- A folder on the skip list containing duplicates, to verify that it is not scanned, and a hidden folder with a copy of another case, to verify that hidden folders are not scanned.
 - Hebrew names.
+- A copy with the same 3 files plus 4 new ones (Jaccard about 0.43, containment 1.0), detected only thanks to containment (case 10).
+- The same library folder (fontawesome) inside two different website projects (case 11), to verify project detection.
+- The script takes an optional target folder (python test_data\make_fixtures.py C:\demo) and never overwrites an existing fixtures folder.
 LangSmith Evaluation (eval/)
 - Evaluation scope: Only the judge function (input: group data; output: Judgement). Do not evaluate the entire graph or real folders.
 - make_dataset.py: Create a duplicate-judge dataset with at least 35 examples using synthetic data in the LLM input format. Each example must include expected_verdict and acceptable_keeps (a list of acceptable keep lists; most examples have one, ambiguous ones have several). Save the examples to eval/dataset.json for review before uploading. Include at least 12 examples whose correct verdict is different. Include all case types from the test folders, especially tricky cases: a copy that is actually the most up-to-date version, similar names with different contents, and different names with identical contents.
 - evaluators.py:
   - verdict_correct: Whether the verdict matches the expected verdict.
   - keep_correct: Whether the model's keep (as a set) equals one of the acceptable_keeps. Skip (return None) when the correct answer is different.
-  - false_duplicate: Return 1 if the correct classification is different but the model classified the item as a duplicate. This is the most dangerous error.
+  - false_duplicate: Return 1 if the correct classification is different but the model classified the item as a duplicate. This is the most dangerous error. Scored only on examples whose correct answer is different, so its mean is the false-duplicate rate among them.
   - failed_calls: When judge returns None (failure after the retry), the example is not counted as an error in the other metrics; it is counted separately in failed_calls, with a breakdown by failure type (timeout, quota, auth, connection, invalid_output, other). Otherwise network failures would distort the comparison between versions.
   - Wait briefly between calls during an experiment to stay within the Gemini quota.
-  - confidence_calibration: Whether errors are concentrated among low-confidence items. Report the average confidence for correct and incorrect answers.
-- run_experiment.py: Run evaluate() twice, using experiment_prefix values v1-names-only and v2-full-context, and print a summary of both experiments.
+  - confidence_calibration: Whether errors are concentrated among low-confidence items. Report the average confidence for correct and incorrect answers, and the share of errors with confidence below DEFAULT_CONFIDENCE_THRESHOLD.
+- The final dataset (duplicate-judge) has 46 examples: 22 identical, 10 copy_with_changes, 14 different. Each example's metadata has a description, a category and a running number, so results can be reported by example number. It includes the fixture cases, two folders in the same temporary location, a library inside two different projects (and a control case inside the same project), and cases inspired by the errors seen during development.
+- run_experiment.py: Run evaluate() for each prompt version with experiment_prefix values v1-names-only, v2-full-context and v3-reason-first, one call at a time (max_concurrency=1). Print a comparison table of all metrics (including failed_calls by type), the examples where consecutive versions answered differently, and the LangSmith links. Options: --run selects which versions to run, and --reuse VERSION=EXPERIMENT_NAME includes an existing experiment in the comparison without running it again.
 README.md
 - Brief description and goal.
 - Graph diagram using Mermaid, or an export from get_graph().draw_mermaid().
@@ -196,15 +244,17 @@ README.md
 - Explanation of safety measures: skip list, Recycle Bin instead of permanent deletion, revalidation, approval for every item, and logging.
 - Privacy: which data is sent to Gemini—names and metadata only, not file contents.
 - Known limitations: individual duplicate files are not handled in this version; Windows only.
-- Placeholders for trace screenshots: pausing at an interrupt, the expand_children loop, and a comparison of the v1 and v2 experiments.
-- A table of experiment results and a placeholder for an insight.
+- Trace screenshots in docs/images, each with a caption that describes exactly what it shows: the interface duplicate card, pausing at an interrupt (human_review), the experiments page with v1, v2 and v3, and the v2 vs v3 answers for dataset example 15. No browser address bar, LangSmith organization ID, or personal paths in any screenshot, and no LangSmith links in the README (they are private).
+- A table of the three experiments, including the caveat that v3's verdict_correct of 1.000 comes from one example moving from "error" to "failed call", not from a real improvement.
+- The central insight from the traces (finding D in docs/findings.md): a prompt fix solved the problem it targeted but created a new failure mode, and the automated evaluation is what exposed it. Additional findings (A, C, E) and the evaluation limitations.
+- Links to docs/SPEC.md and docs/findings.md; no links to files outside the project folder.
 Build Order (Stop After Each Stage)
 1. Setup: folder structure, config.py, requirements.txt, .env.example, and .gitignore.
 2. scanner.py and test_data/make_fixtures.py, verifying that the scan finds exactly the expected cases.
 3. llm_judge.py, with manual testing on 3–4 groups.
 4. actions.py and graph.py, with a complete run through cli.py on the test folders.
 5. app.py.
-6. eval/: create the dataset and run both experiments.
+6. eval/: create the dataset, review it before uploading, and run the experiments (v1 and v2, then v3 after analyzing the v2 errors).
 7. README.md.
 Do not implement at this stage: duplicate detection for individual files. This is planned for the next version.
 Additional Clarifications (Mandatory)
