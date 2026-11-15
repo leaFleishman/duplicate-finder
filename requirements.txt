@@ -1,0 +1,9 @@
+langgraph
+langgraph-checkpoint-sqlite
+langchain-google-genai
+langsmith
+streamlit
+send2trash
+python-dotenv
+pydantic
+pytest

@@ -1,0 +1,16 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Local runtime data: contains real, private paths
+checkpoints.sqlite
+checkpoints.sqlite*
+logs/actions_log.csv
+logs/*.csv
+logs/test_runs/

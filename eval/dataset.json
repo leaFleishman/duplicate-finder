@@ -1,0 +1,3481 @@
+[
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\מסמכים",
+            "name": "מסמכים",
+            "size_bytes": 13002342,
+            "file_count": 37,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\מסמכים - עותק",
+            "name": "מסמכים - עותק",
+            "size_bytes": 13002342,
+            "file_count": 37,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "עותק זהה עם הסיומת '- עותק' באותה תיקייה",
+      "category": "fixture-01",
+      "number": 1
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\פרויקט",
+            "name": "פרויקט",
+            "size_bytes": 13002342,
+            "file_count": 37,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\פרויקט (2)",
+            "name": "פרויקט (2)",
+            "size_bytes": 13002342,
+            "file_count": 37,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "C",
+            "path": "C:\\Users\\user\\Documents\\פרויקט - עותק",
+            "name": "פרויקט - עותק",
+            "size_bytes": 13002342,
+            "file_count": 37,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "שלושה עותקים זהים: פרויקט, '- עותק', '(2)'",
+      "category": "fixture-02",
+      "number": 2
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\random_stuff_17",
+            "name": "random_stuff_17",
+            "size_bytes": 13002342,
+            "file_count": 37,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\חומרי קורס",
+            "name": "חומרי קורס",
+            "size_bytes": 13002342,
+            "file_count": 37,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "תוכן זהה, שמות שונים לגמרי: 'חומרי קורס' מול 'random_stuff_17'",
+      "category": "fixture-05",
+      "number": 3
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\New folder (3)",
+            "name": "New folder (3)",
+            "size_bytes": 3250585,
+            "file_count": 22,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\מתכונים",
+            "name": "מתכונים",
+            "size_bytes": 3250585,
+            "file_count": 22,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "תוכן זהה, שמות שונים: 'New folder (3)' מול 'מתכונים'",
+      "category": "names",
+      "number": 4
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Pictures\\Copy of Photos 2023",
+            "name": "Copy of Photos 2023",
+            "size_bytes": 880803840,
+            "file_count": 612,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Pictures\\Photos 2023",
+            "name": "Photos 2023",
+            "size_bytes": 880803840,
+            "file_count": 612,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "'Copy of Photos 2023' מול 'Photos 2023' (באנגלית)",
+      "category": "names",
+      "number": 5
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\Report final",
+            "name": "Report final",
+            "size_bytes": 4404019,
+            "file_count": 9,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\Report final - Copy",
+            "name": "Report final - Copy",
+            "size_bytes": 4404019,
+            "file_count": 9,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "'Report final' מול 'Report final - Copy'",
+      "category": "names",
+      "number": 6
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Projects\\קוד",
+            "name": "קוד",
+            "size_bytes": 18874368,
+            "file_count": 240,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Projects\\קוד_old",
+            "name": "קוד_old",
+            "size_bytes": 18874368,
+            "file_count": 240,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "סיומת _old: 'קוד_old' מול 'קוד', תוכן זהה",
+      "category": "names",
+      "number": 7
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\תזה",
+            "name": "תזה",
+            "size_bytes": 6815744,
+            "file_count": 14,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\תזה ישן",
+            "name": "תזה ישן",
+            "size_bytes": 6815744,
+            "file_count": 14,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "המילה 'ישן': 'תזה ישן' מול 'תזה', תוכן זהה",
+      "category": "names",
+      "number": 8
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Pictures\\Screenshots",
+            "name": "Screenshots",
+            "size_bytes": 99614720,
+            "file_count": 180,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Pictures\\Screenshots (2)",
+            "name": "Screenshots (2)",
+            "size_bytes": 99614720,
+            "file_count": 180,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "'Screenshots' מול 'Screenshots (2)' באותה תיקייה",
+      "category": "names",
+      "number": 9
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\חוזים",
+            "name": "חוזים",
+            "size_bytes": 2411724,
+            "file_count": 11,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Downloads\\חוזים",
+            "name": "חוזים",
+            "size_bytes": 2411724,
+            "file_count": 11,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "Documents מול Downloads, אותו שם",
+      "category": "location",
+      "number": 10
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Desktop\\סיכומים",
+            "name": "סיכומים",
+            "size_bytes": 8074035,
+            "file_count": 31,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\לימודים\\סיכומים",
+            "name": "סיכומים",
+            "size_bytes": 8074035,
+            "file_count": 31,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "Desktop מול Documents\\לימודים, אותו שם",
+      "category": "location",
+      "number": 11
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Desktop\\app - Copy",
+            "name": "app - Copy",
+            "size_bytes": 57671680,
+            "file_count": 410,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Projects\\app",
+            "name": "app",
+            "size_bytes": 57671680,
+            "file_count": 410,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "Projects מול Desktop עם '- Copy'",
+      "category": "location",
+      "number": 12
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Desktop\\מתכונים - עותק",
+            "name": "מתכונים - עותק",
+            "size_bytes": 3145728,
+            "file_count": 20,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\מתכונים",
+            "name": "מתכונים",
+            "size_bytes": 3145728,
+            "file_count": 20,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "C",
+            "path": "C:\\Users\\user\\Downloads\\מתכונים",
+            "name": "מתכונים",
+            "size_bytes": 3145728,
+            "file_count": 20,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "B"
+        ],
+        [
+          "C"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "שלושה עותקים: Documents, Downloads, ו-Desktop עם '- עותק'",
+      "category": "location",
+      "number": 13
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\גיבוי טלפון 2022",
+            "name": "גיבוי טלפון 2022",
+            "size_bytes": 2202009600,
+            "file_count": 1850,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Pictures\\טלפון 2022",
+            "name": "טלפון 2022",
+            "size_bytes": 2202009600,
+            "file_count": 1850,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "'גיבוי טלפון 2022' ב-Documents מול 'טלפון 2022' ב-Pictures",
+      "category": "location",
+      "number": 14
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\חשבוניות - עותק",
+            "name": "חשבוניות - עותק",
+            "size_bytes": 1887436,
+            "file_count": 24,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Downloads\\חשבוניות",
+            "name": "חשבוניות",
+            "size_bytes": 1887436,
+            "file_count": 24,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "שם של עותק במקום מסודר מול שם מקורי ב-Downloads: המיקום גובר",
+      "category": "location-conflict",
+      "number": 15
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Downloads\\תמונות טיול",
+            "name": "תמונות טיול",
+            "size_bytes": 335544320,
+            "file_count": 150,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Downloads\\תמונות טיול (1)",
+            "name": "תמונות טיול (1)",
+            "size_bytes": 335544320,
+            "file_count": 150,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "שתי התיקיות ב-Downloads: 'תמונות טיול' מול 'תמונות טיול (1)'",
+      "category": "same-location",
+      "number": 16
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\AppData\\Local\\Temp\\extract_8812\\אתר",
+            "name": "אתר",
+            "size_bytes": 1572864,
+            "file_count": 5,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\AppData\\Local\\Temp\\extract_8812\\אתר גיבוי",
+            "name": "אתר גיבוי",
+            "size_bytes": 1572864,
+            "file_count": 5,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "שתי התיקיות בתיקייה זמנית (Temp): 'אתר' מול 'אתר גיבוי'",
+      "category": "same-location",
+      "number": 17
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\AppData\\Local\\Temp\\extract_8812\\אתר גיבוי\\תמונות",
+            "name": "תמונות",
+            "size_bytes": 1258291,
+            "file_count": 2,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\AppData\\Local\\Temp\\extract_8812\\אתר\\תמונות",
+            "name": "תמונות",
+            "size_bytes": 1258291,
+            "file_count": 2,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "שתי התיקיות ב-Temp, עמוק: 'אתר\\תמונות' מול 'אתר גיבוי\\תמונות'",
+      "category": "same-location",
+      "number": 18
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Desktop\\מצגת",
+            "name": "מצגת",
+            "size_bytes": 26214400,
+            "file_count": 8,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Desktop\\מצגת - עותק",
+            "name": "מצגת - עותק",
+            "size_bytes": 26214400,
+            "file_count": 8,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "שתי התיקיות על שולחן העבודה: 'מצגת' מול 'מצגת - עותק'",
+      "category": "same-location",
+      "number": 19
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Projects\\אתר בלוג\\fontawesome",
+            "name": "fontawesome",
+            "size_bytes": 1468006,
+            "file_count": 4,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": "C:\\Users\\user\\Projects\\אתר בלוג"
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Projects\\אתר חנות\\fontawesome",
+            "name": "fontawesome",
+            "size_bytes": 1468006,
+            "file_count": 4,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": "C:\\Users\\user\\Projects\\אתר חנות"
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A",
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "ספריית fontawesome זהה בתוך שני פרויקטים שונים: כל פרויקט צריך את העותק שלו",
+      "category": "fixture-11",
+      "number": 20
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\עבודות\\לקוח כהן - אתר\\css",
+            "name": "css",
+            "size_bytes": 2726297,
+            "file_count": 14,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": "C:\\Users\\user\\Documents\\עבודות\\לקוח כהן - אתר"
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\עבודות\\לקוח לוי - אתר\\css",
+            "name": "css",
+            "size_bytes": 2726297,
+            "file_count": 14,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": "C:\\Users\\user\\Documents\\עבודות\\לקוח לוי - אתר"
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A",
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "תיקיית css זהה בשני פרויקטים של לקוחות שונים",
+      "category": "projects",
+      "number": 21
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 1.0,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Projects\\shop\\lib\\bootstrap",
+            "name": "bootstrap",
+            "size_bytes": 3355443,
+            "file_count": 30,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": "C:\\Users\\user\\Projects\\shop"
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Projects\\shop\\lib\\bootstrap - Copy",
+            "name": "bootstrap - Copy",
+            "size_bytes": 3355443,
+            "file_count": 30,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": "C:\\Users\\user\\Projects\\shop"
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "identical",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "ביקורת: שני עותקים של ספרייה באותו פרויקט ('- Copy'): אפשר למחוק אחד",
+      "category": "projects-control",
+      "number": 22
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.8,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\תזה",
+            "name": "תזה",
+            "size_bytes": 1258291,
+            "file_count": 4,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\תזה - עותק",
+            "name": "תזה - עותק",
+            "size_bytes": 1614807,
+            "file_count": 5,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "פרק 5 - חדש.docx",
+                "size_bytes": 350208
+              }
+            ],
+            "unique_count": 1,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "copy_with_changes",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "העותק מכיל קובץ חדש ועדכני: העותק הוא הגרסה העדכנית",
+      "category": "fixture-03",
+      "number": 23
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.429,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\מצגת",
+            "name": "מצגת",
+            "size_bytes": 1237319,
+            "file_count": 3,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\מצגת - מורחבת",
+            "name": "מצגת - מורחבת",
+            "size_bytes": 1667235,
+            "file_count": 7,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "שקף נוסף 1.pptx",
+                "size_bytes": 103424
+              },
+              {
+                "relative_path": "שקף נוסף 2.pptx",
+                "size_bytes": 104448
+              },
+              {
+                "relative_path": "שקף נוסף 3.pptx",
+                "size_bytes": 105472
+              },
+              {
+                "relative_path": "שקף נוסף 4.pptx",
+                "size_bytes": 106496
+              }
+            ],
+            "unique_count": 4,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "copy_with_changes",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "עותק מורחב: אותם 3 קבצים ועוד 4 חדשים (Jaccard 0.43, containment 1.0)",
+      "category": "fixture-10",
+      "number": 24
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.85,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\דוח שנתי",
+            "name": "דוח שנתי",
+            "size_bytes": 3145728,
+            "file_count": 17,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\דוח שנתי_old",
+            "name": "דוח שנתי_old",
+            "size_bytes": 3565158,
+            "file_count": 20,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "טיוטה 4.docx",
+                "size_bytes": 215040
+              },
+              {
+                "relative_path": "טיוטה 5.docx",
+                "size_bytes": 225280
+              },
+              {
+                "relative_path": "נתונים מעודכנים.xlsx",
+                "size_bytes": 81920
+              }
+            ],
+            "unique_count": 3,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "copy_with_changes",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "שם '_old' אבל דווקא הוא מכיל את הקבצים העדכניים",
+      "category": "newer-copy",
+      "number": 25
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.75,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\תקציב משפחתי",
+            "name": "תקציב משפחתי",
+            "size_bytes": 943718,
+            "file_count": 12,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Downloads\\תקציב משפחתי",
+            "name": "תקציב משפחתי",
+            "size_bytes": 1363148,
+            "file_count": 16,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "תקציב 2025.xlsx",
+                "size_bytes": 97280
+              },
+              {
+                "relative_path": "קבלות ינואר.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "קבלות פברואר.pdf",
+                "size_bytes": 153600
+              },
+              {
+                "relative_path": "הערות.txt",
+                "size_bytes": 2048
+              }
+            ],
+            "unique_count": 4,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "copy_with_changes",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "העותק ב-Downloads מכיל קבצים חדשים; המקור ב-Documents ישן: התוכן גובר על המיקום",
+      "category": "newer-copy",
+      "number": 26
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.88,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\thesis",
+            "name": "thesis",
+            "size_bytes": 8493465,
+            "file_count": 22,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\Copy of thesis",
+            "name": "Copy of thesis",
+            "size_bytes": 9332326,
+            "file_count": 25,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "chapter6.docx",
+                "size_bytes": 419840
+              },
+              {
+                "relative_path": "figures\\fig12.png",
+                "size_bytes": 307200
+              },
+              {
+                "relative_path": "refs_updated.bib",
+                "size_bytes": 40960
+              }
+            ],
+            "unique_count": 3,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "copy_with_changes",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "'Copy of thesis' עם פרק נוסף ועדכני",
+      "category": "newer-copy",
+      "number": 27
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.8,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Projects\\אתר העסק",
+            "name": "אתר העסק",
+            "size_bytes": 41943040,
+            "file_count": 120,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "blog\\post-31.html",
+                "size_bytes": 18432
+              },
+              {
+                "relative_path": "img\\banner2.jpg",
+                "size_bytes": 655360
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Projects\\אתר העסק - גיבוי ישן",
+            "name": "אתר העסק - גיבוי ישן",
+            "size_bytes": 40894464,
+            "file_count": 118,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "copy_with_changes",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "המקור מכיל קבצים חדשים; 'גיבוי ישן' הוא תמונת מצב ישנה",
+      "category": "older-copy",
+      "number": 28
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.9,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\recipes",
+            "name": "recipes",
+            "size_bytes": 2306867,
+            "file_count": 30,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "pasta.docx",
+                "size_bytes": 30720
+              },
+              {
+                "relative_path": "bread.docx",
+                "size_bytes": 25600
+              },
+              {
+                "relative_path": "cake.docx",
+                "size_bytes": 28672
+              }
+            ],
+            "unique_count": 3,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\recipes backup",
+            "name": "recipes backup",
+            "size_bytes": 2202009,
+            "file_count": 27,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "copy_with_changes",
+      "acceptable_keeps": [
+        [
+          "A"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "תיקיית backup ישנה; התיקייה הראשית עדכנית יותר",
+      "category": "older-copy",
+      "number": 29
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.78,
+        "containment": 0.86,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Pictures\\תמונות 2024",
+            "name": "תמונות 2024",
+            "size_bytes": 1258291200,
+            "file_count": 700,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "IMG_4101.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4102.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4103.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4104.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4105.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4106.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4107.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4108.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4109.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4110.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4111.jpg",
+                "size_bytes": 3584000
+              },
+              {
+                "relative_path": "IMG_4112.jpg",
+                "size_bytes": 3584000
+              }
+            ],
+            "unique_count": 12,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Pictures\\תמונות 2024 - עותק",
+            "name": "תמונות 2024 - עותק",
+            "size_bytes": 1237319680,
+            "file_count": 694,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "IMG_5201.jpg",
+                "size_bytes": 3481600
+              },
+              {
+                "relative_path": "IMG_5202.jpg",
+                "size_bytes": 3481600
+              },
+              {
+                "relative_path": "IMG_5203.jpg",
+                "size_bytes": 3481600
+              },
+              {
+                "relative_path": "IMG_5204.jpg",
+                "size_bytes": 3481600
+              },
+              {
+                "relative_path": "IMG_5205.jpg",
+                "size_bytes": 3481600
+              },
+              {
+                "relative_path": "IMG_5206.jpg",
+                "size_bytes": 3481600
+              }
+            ],
+            "unique_count": 6,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "copy_with_changes",
+      "acceptable_keeps": [
+        [
+          "A",
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "לשני הצדדים קבצים ייחודיים: שומרים את שניהם",
+      "category": "both-unique",
+      "number": 30
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.8,
+        "containment": 0.9,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\עבודה סמינריונית",
+            "name": "עבודה סמינריונית",
+            "size_bytes": 5242880,
+            "file_count": 18,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "ראיון 3.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "ראיון 4.docx",
+                "size_bytes": 65536
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Downloads\\עבודה סמינריונית",
+            "name": "עבודה סמינריונית",
+            "size_bytes": 5033164,
+            "file_count": 17,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "הערות המנחה.pdf",
+                "size_bytes": 122880
+              }
+            ],
+            "unique_count": 1,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "copy_with_changes",
+      "acceptable_keeps": [
+        [
+          "A",
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "לשני הצדדים קבצים ייחודיים, אחד מהם ב-Downloads: שומרים את שניהם",
+      "category": "both-unique",
+      "number": 31
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.333,
+        "containment": 1.0,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Downloads\\photos_part",
+            "name": "photos_part",
+            "size_bytes": 62914560,
+            "file_count": 20,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [],
+            "unique_count": 0,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Pictures\\Trip 2023",
+            "name": "Trip 2023",
+            "size_bytes": 188743680,
+            "file_count": 60,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "DSC_1.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_2.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_3.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_4.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_5.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_6.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_7.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_8.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_9.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_10.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_11.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_12.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_13.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_14.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_15.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_16.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_17.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_18.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_19.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_20.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_21.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_22.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_23.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_24.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_25.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_26.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_27.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_28.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_29.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_30.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_31.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_32.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_33.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_34.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_35.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_36.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_37.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_38.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_39.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "DSC_40.jpg",
+                "size_bytes": 3072000
+              }
+            ],
+            "unique_count": 40,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "copy_with_changes",
+      "acceptable_keeps": [
+        [
+          "B"
+        ]
+      ]
+    },
+    "metadata": {
+      "description": "חלק קטן של אלבום (20 קבצים) נמצא במלואו בתוך האלבום המלא (60 קבצים)",
+      "category": "containment",
+      "number": 32
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.667,
+        "containment": 0.8,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\דוח 2024",
+            "name": "דוח 2024",
+            "size_bytes": 1300234,
+            "file_count": 5,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [
+              {
+                "relative_path": "דוח 2024.docx",
+                "size_bytes": 600064
+              }
+            ],
+            "unique_count": 1,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\דוח 2025",
+            "name": "דוח 2025",
+            "size_bytes": 1310720,
+            "file_count": 5,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "דוח 2025.docx",
+                "size_bytes": 610304
+              }
+            ],
+            "unique_count": 1,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "שמות דומים, תוכן שונה: 'דוח 2024' מול 'דוח 2025' (רק תבניות משותפות)",
+      "category": "fixture-04",
+      "number": 33
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.5,
+        "containment": 0.75,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\Invoices 2023",
+            "name": "Invoices 2023",
+            "size_bytes": 2097152,
+            "file_count": 8,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [
+              {
+                "relative_path": "inv-2023-01.pdf",
+                "size_bytes": 307200
+              },
+              {
+                "relative_path": "inv-2023-02.pdf",
+                "size_bytes": 317440
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\Invoices 2024",
+            "name": "Invoices 2024",
+            "size_bytes": 2202009,
+            "file_count": 8,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "inv-2024-01.pdf",
+                "size_bytes": 327680
+              },
+              {
+                "relative_path": "inv-2024-02.pdf",
+                "size_bytes": 337920
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "'Invoices 2023' מול 'Invoices 2024' עם לוגו ותבנית משותפים",
+      "category": "similar-names",
+      "number": 34
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.6,
+        "containment": 0.75,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\קורס\\תרגיל 1",
+            "name": "תרגיל 1",
+            "size_bytes": 1153433,
+            "file_count": 4,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [
+              {
+                "relative_path": "פתרון.py",
+                "size_bytes": 12288
+              }
+            ],
+            "unique_count": 1,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\קורס\\תרגיל 2",
+            "name": "תרגיל 2",
+            "size_bytes": 1363148,
+            "file_count": 4,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "פתרון.py",
+                "size_bytes": 15360
+              }
+            ],
+            "unique_count": 1,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "'תרגיל 1' מול 'תרגיל 2' עם קובץ הנחיות משותף",
+      "category": "similar-names",
+      "number": 35
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.6,
+        "containment": 0.75,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\לקוחות\\לקוח - כהן",
+            "name": "לקוח - כהן",
+            "size_bytes": 1677721,
+            "file_count": 4,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "חוזה חתום.pdf",
+                "size_bytes": 409600
+              }
+            ],
+            "unique_count": 1,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\לקוחות\\לקוח - לוי",
+            "name": "לקוח - לוי",
+            "size_bytes": 1782579,
+            "file_count": 4,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "חוזה חתום.pdf",
+                "size_bytes": 430080
+              }
+            ],
+            "unique_count": 1,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "'לקוח - כהן' מול 'לקוח - לוי' עם תבנית חוזה משותפת",
+      "category": "similar-names",
+      "number": 36
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.5,
+        "containment": 0.75,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\תואר\\סמסטר א",
+            "name": "סמסטר א",
+            "size_bytes": 31457280,
+            "file_count": 40,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [
+              {
+                "relative_path": "מבחן לינארית.pdf",
+                "size_bytes": 921600
+              },
+              {
+                "relative_path": "סיכום חדו\"א.docx",
+                "size_bytes": 409600
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\תואר\\סמסטר ב",
+            "name": "סמסטר ב",
+            "size_bytes": 35651584,
+            "file_count": 44,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "מבחן הסתברות.pdf",
+                "size_bytes": 972800
+              },
+              {
+                "relative_path": "סיכום אלגו.docx",
+                "size_bytes": 430080
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "'סמסטר א' מול 'סמסטר ב' עם סילבוס ותקנון משותפים",
+      "category": "similar-names",
+      "number": 37
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.55,
+        "containment": 0.8,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\כנסים\\מצגת כנס 2023",
+            "name": "מצגת כנס 2023",
+            "size_bytes": 23068672,
+            "file_count": 9,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [
+              {
+                "relative_path": "מצגת.pptx",
+                "size_bytes": 9216000
+              }
+            ],
+            "unique_count": 1,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\כנסים\\מצגת כנס 2024",
+            "name": "מצגת כנס 2024",
+            "size_bytes": 26214400,
+            "file_count": 10,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "מצגת.pptx",
+                "size_bytes": 10752000
+              },
+              {
+                "relative_path": "וידאו.mp4",
+                "size_bytes": 3072000
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "'מצגת כנס 2023' מול 'מצגת כנס 2024' עם תמונות רקע משותפות",
+      "category": "similar-names",
+      "number": 38
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.5,
+        "containment": 0.75,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Pictures\\ילדים\\נועה\\תמונות",
+            "name": "תמונות",
+            "size_bytes": 419430400,
+            "file_count": 120,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "נועה_1.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_2.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_3.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_4.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_5.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_6.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_7.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_8.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_9.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_10.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_11.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_12.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_13.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_14.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_15.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_16.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_17.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_18.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_19.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_20.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_21.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_22.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_23.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_24.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_25.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_26.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_27.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_28.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_29.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "נועה_30.jpg",
+                "size_bytes": 3072000
+              }
+            ],
+            "unique_count": 30,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Pictures\\ילדים\\יואב\\תמונות",
+            "name": "תמונות",
+            "size_bytes": 398458880,
+            "file_count": 120,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "יואב_1.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_2.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_3.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_4.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_5.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_6.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_7.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_8.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_9.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_10.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_11.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_12.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_13.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_14.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_15.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_16.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_17.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_18.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_19.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_20.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_21.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_22.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_23.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_24.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_25.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_26.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_27.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_28.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_29.jpg",
+                "size_bytes": 3072000
+              },
+              {
+                "relative_path": "יואב_30.jpg",
+                "size_bytes": 3072000
+              }
+            ],
+            "unique_count": 30,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "אותו שם 'תמונות' אצל שני ילדים, חלק מתמונות המשפחה משותפות",
+      "category": "same-name",
+      "number": 39
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.55,
+        "containment": 0.75,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\Teaching\\Final exam 2023",
+            "name": "Final exam 2023",
+            "size_bytes": 1677721,
+            "file_count": 6,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [
+              {
+                "relative_path": "exam.docx",
+                "size_bytes": 225280
+              },
+              {
+                "relative_path": "solutions.docx",
+                "size_bytes": 184320
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\Teaching\\Final exam 2024",
+            "name": "Final exam 2024",
+            "size_bytes": 1782579,
+            "file_count": 6,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "exam.docx",
+                "size_bytes": 235520
+              },
+              {
+                "relative_path": "solutions.docx",
+                "size_bytes": 194560
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "'Final exam 2023' מול 'Final exam 2024' עם דף נוסחאות משותף",
+      "category": "similar-names",
+      "number": 40
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.6,
+        "containment": 0.8,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\הוראה\\דפי עבודה כיתה ד",
+            "name": "דפי עבודה כיתה ד",
+            "size_bytes": 12582912,
+            "file_count": 40,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "דף עבודה ד - 1.pdf",
+                "size_bytes": 307200
+              },
+              {
+                "relative_path": "דף עבודה ד - 2.pdf",
+                "size_bytes": 307200
+              },
+              {
+                "relative_path": "דף עבודה ד - 3.pdf",
+                "size_bytes": 307200
+              },
+              {
+                "relative_path": "דף עבודה ד - 4.pdf",
+                "size_bytes": 307200
+              },
+              {
+                "relative_path": "דף עבודה ד - 5.pdf",
+                "size_bytes": 307200
+              },
+              {
+                "relative_path": "דף עבודה ד - 6.pdf",
+                "size_bytes": 307200
+              },
+              {
+                "relative_path": "דף עבודה ד - 7.pdf",
+                "size_bytes": 307200
+              },
+              {
+                "relative_path": "דף עבודה ד - 8.pdf",
+                "size_bytes": 307200
+              }
+            ],
+            "unique_count": 8,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\הוראה\\דפי עבודה כיתה ה",
+            "name": "דפי עבודה כיתה ה",
+            "size_bytes": 13631488,
+            "file_count": 42,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "דף עבודה ה - 1.pdf",
+                "size_bytes": 317440
+              },
+              {
+                "relative_path": "דף עבודה ה - 2.pdf",
+                "size_bytes": 317440
+              },
+              {
+                "relative_path": "דף עבודה ה - 3.pdf",
+                "size_bytes": 317440
+              },
+              {
+                "relative_path": "דף עבודה ה - 4.pdf",
+                "size_bytes": 317440
+              },
+              {
+                "relative_path": "דף עבודה ה - 5.pdf",
+                "size_bytes": 317440
+              },
+              {
+                "relative_path": "דף עבודה ה - 6.pdf",
+                "size_bytes": 317440
+              },
+              {
+                "relative_path": "דף עבודה ה - 7.pdf",
+                "size_bytes": 317440
+              },
+              {
+                "relative_path": "דף עבודה ה - 8.pdf",
+                "size_bytes": 317440
+              },
+              {
+                "relative_path": "דף עבודה ה - 9.pdf",
+                "size_bytes": 317440
+              },
+              {
+                "relative_path": "דף עבודה ה - 10.pdf",
+                "size_bytes": 317440
+              }
+            ],
+            "unique_count": 10,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "'דפי עבודה כיתה ד' מול 'דפי עבודה כיתה ה': רוב הדפים משותפים, אבל אלה שני אוספים נפרדים",
+      "category": "collections",
+      "number": 41
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.45,
+        "containment": 0.72,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\מתכונים של סבתא",
+            "name": "מתכונים של סבתא",
+            "size_bytes": 2097152,
+            "file_count": 25,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [
+              {
+                "relative_path": "סבתא - מתכון 1.docx",
+                "size_bytes": 46080
+              },
+              {
+                "relative_path": "סבתא - מתכון 2.docx",
+                "size_bytes": 46080
+              },
+              {
+                "relative_path": "סבתא - מתכון 3.docx",
+                "size_bytes": 46080
+              },
+              {
+                "relative_path": "סבתא - מתכון 4.docx",
+                "size_bytes": 46080
+              },
+              {
+                "relative_path": "סבתא - מתכון 5.docx",
+                "size_bytes": 46080
+              },
+              {
+                "relative_path": "סבתא - מתכון 6.docx",
+                "size_bytes": 46080
+              },
+              {
+                "relative_path": "סבתא - מתכון 7.docx",
+                "size_bytes": 46080
+              }
+            ],
+            "unique_count": 7,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\מתכונים של אמא",
+            "name": "מתכונים של אמא",
+            "size_bytes": 2516582,
+            "file_count": 30,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "אמא - מתכון 1.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 2.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 3.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 4.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 5.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 6.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 7.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 8.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 9.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 10.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 11.docx",
+                "size_bytes": 49152
+              },
+              {
+                "relative_path": "אמא - מתכון 12.docx",
+                "size_bytes": 49152
+              }
+            ],
+            "unique_count": 12,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "'מתכונים של סבתא' מול 'מתכונים של אמא': כמה מתכונים משפחתיים משותפים",
+      "category": "collections",
+      "number": 42
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.5,
+        "containment": 0.75,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\עיצובים\\הזמנה - חתונת דנה ויוסי",
+            "name": "הזמנה - חתונת דנה ויוסי",
+            "size_bytes": 50331648,
+            "file_count": 8,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "הזמנה סופית.psd",
+                "size_bytes": 21504000
+              },
+              {
+                "relative_path": "הזמנה.pdf",
+                "size_bytes": 921600
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Documents\\עיצובים\\הזמנה - בר מצווה של איתי",
+            "name": "הזמנה - בר מצווה של איתי",
+            "size_bytes": 54525952,
+            "file_count": 8,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "הזמנה סופית.psd",
+                "size_bytes": 23552000
+              },
+              {
+                "relative_path": "הזמנה.pdf",
+                "size_bytes": 972800
+              }
+            ],
+            "unique_count": 2,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "'הזמנה - חתונת דנה ויוסי' מול 'הזמנה - בר מצווה של איתי': גופנים ותבנית משותפים",
+      "category": "template",
+      "number": 43
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.25,
+        "containment": 0.7,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Projects\\weather-app",
+            "name": "weather-app",
+            "size_bytes": 1363148,
+            "file_count": 10,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "src\\weather.js",
+                "size_bytes": 40960
+              },
+              {
+                "relative_path": "src\\api.js",
+                "size_bytes": 22528
+              },
+              {
+                "relative_path": "index.html",
+                "size_bytes": 6144
+              }
+            ],
+            "unique_count": 3,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Projects\\todo-app",
+            "name": "todo-app",
+            "size_bytes": 2936012,
+            "file_count": 31,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "src\\components\\Todo1.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo2.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo3.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo4.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo5.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo6.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo7.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo8.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo9.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo10.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo11.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo12.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo13.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo14.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo15.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo16.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo17.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo18.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo19.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "src\\components\\Todo20.jsx",
+                "size_bytes": 12288
+              },
+              {
+                "relative_path": "index.html",
+                "size_bytes": 5120
+              }
+            ],
+            "unique_count": 21,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "שני פרויקטים שונים ב-Projects עם מעט קבצי הגדרות משותפים (eslint, prettier, LICENSE)",
+      "category": "two-projects",
+      "number": 44
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.3,
+        "containment": 0.75,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Projects\\Calculator",
+            "name": "Calculator",
+            "size_bytes": 6291456,
+            "file_count": 16,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [
+              {
+                "relative_path": "Calculator.sln",
+                "size_bytes": 2048
+              },
+              {
+                "relative_path": "Calculator\\Program.cs",
+                "size_bytes": 9216
+              },
+              {
+                "relative_path": "Calculator\\Calculator.csproj",
+                "size_bytes": 3072
+              },
+              {
+                "relative_path": "Calculator\\Ops.cs",
+                "size_bytes": 14336
+              }
+            ],
+            "unique_count": 4,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Projects\\InventoryApp",
+            "name": "InventoryApp",
+            "size_bytes": 14680064,
+            "file_count": 40,
+            "latest_modified": "2025-06-01 12:00",
+            "unique_files": [
+              {
+                "relative_path": "InventoryApp.sln",
+                "size_bytes": 2048
+              },
+              {
+                "relative_path": "InventoryApp\\InventoryApp.csproj",
+                "size_bytes": 4096
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item1.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item2.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item3.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item4.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item5.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item6.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item7.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item8.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item9.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item10.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item11.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item12.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item13.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item14.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item15.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item16.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item17.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item18.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item19.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item20.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item21.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item22.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item23.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item24.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item25.cs",
+                "size_bytes": 6144
+              },
+              {
+                "relative_path": "InventoryApp\\Models\\Item26.cs",
+                "size_bytes": 6144
+              }
+            ],
+            "unique_count": 28,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "שני פתרונות Visual Studio שונים עם אותה ספריית NuGet בתיקיית packages",
+      "category": "two-projects",
+      "number": 45
+    }
+  },
+  {
+    "inputs": {
+      "group": {
+        "id": "g1",
+        "type": "duplicate",
+        "jaccard": 0.1,
+        "containment": 0.12,
+        "members": [
+          {
+            "id": "A",
+            "path": "C:\\Users\\user\\Documents\\עבודה\\מסמכים",
+            "name": "מסמכים",
+            "size_bytes": 9437184,
+            "file_count": 48,
+            "latest_modified": "2024-09-02 14:30",
+            "unique_files": [
+              {
+                "relative_path": "פרוטוקול ישיבה 1.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 2.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 3.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 4.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 5.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 6.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 7.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 8.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 9.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 10.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 11.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 12.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 13.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 14.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 15.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 16.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 17.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 18.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 19.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 20.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 21.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 22.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 23.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 24.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 25.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 26.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 27.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 28.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 29.docx",
+                "size_bytes": 61440
+              },
+              {
+                "relative_path": "פרוטוקול ישיבה 30.docx",
+                "size_bytes": 61440
+              }
+            ],
+            "unique_count": 30,
+            "project": null
+          },
+          {
+            "id": "B",
+            "path": "C:\\Users\\user\\Desktop\\ארכיון משפחתי\\מסמכים",
+            "name": "מסמכים",
+            "size_bytes": 11534336,
+            "file_count": 52,
+            "latest_modified": "2024-01-15 10:00",
+            "unique_files": [
+              {
+                "relative_path": "תעודה סרוקה 1.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 2.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 3.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 4.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 5.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 6.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 7.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 8.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 9.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 10.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 11.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 12.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 13.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 14.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 15.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 16.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 17.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 18.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 19.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 20.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 21.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 22.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 23.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 24.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 25.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 26.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 27.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 28.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 29.pdf",
+                "size_bytes": 184320
+              },
+              {
+                "relative_path": "תעודה סרוקה 30.pdf",
+                "size_bytes": 184320
+              }
+            ],
+            "unique_count": 30,
+            "project": null
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "expected_verdict": "different",
+      "acceptable_keeps": [
+        []
+      ]
+    },
+    "metadata": {
+      "description": "אותו שם בדיוק ('מסמכים') בשני מקומות שונים, תוכן שונה לגמרי (חפיפה 10%)",
+      "category": "same-name",
+      "number": 46
+    }
+  }
+]
