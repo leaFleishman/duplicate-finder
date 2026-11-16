@@ -74,6 +74,7 @@ Use only IDs from the input. Must be empty if the verdict is "different", \
 and must not be empty otherwise.
 - reason: a short explanation in Hebrew, 1-3 sentences."""
 
+# v2 – adds overlap data, unique files and decision criteria
 V2_CRITERIA = """\
 How to read the input:
 - Files are compared by content hash, so file names do not affect the overlap.
@@ -105,9 +106,11 @@ such as css or fontawesome), and deleting one copy can break that project. In th
 keep every member, give low confidence (below 0.5), and say in the reason that both \
 copies may be needed by different projects."""
 
+# v1 – baseline: names and paths only
 V1_QUESTION = "Are these copies of the same folder, and which one should be kept?"
 V2_QUESTION = "Judge this group according to the criteria."
 
+# v3 – v2 + reason before keep, and explicit keep/delete IDs in the reason
 # v3 = v2 plus this instruction (and the reason-before-keep schema).
 V3_INSTRUCTION = """\
 In the reason, name explicitly the IDs of the members to keep and the members to delete, \
