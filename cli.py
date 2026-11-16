@@ -19,16 +19,19 @@ VERDICT_LABELS = {"identical": "זהות", "copy_with_changes": "עותק עם �
 MAX_UNIQUE_FILES_TO_PRINT = 10
 
 
+# חריגה לעצירה מסודרת כשהקלט נגמר (ההרצה נשמרת)
 class StopRun(Exception):
     """Input ended (Ctrl+Z / closed terminal): stop and keep the checkpoint."""
 
 
+# הצגת גודל ב-KB או MB
 def format_size(size_bytes: int) -> str:
     if size_bytes >= 1024 * 1024:
         return f"{size_bytes / (1024 * 1024):.2f} MB"
     return f"{size_bytes / 1024:.0f} KB"
 
 
+# קריאת שורה מהמשתמשת; בסוף הקלט עוצרים ושומרים
 def ask(prompt: str) -> str:
     try:
         return input(prompt).strip()
@@ -39,6 +42,7 @@ def ask(prompt: str) -> str:
 # ------------------------------------------------------------------ Items
 
 
+# הדפסת קבוצת כפילויות: חברים, קבצים ייחודיים והמלצה
 def print_duplicate(payload: dict) -> None:
     group = payload["item"]
     print(f"\n=== קבוצה {group['id']}: {len(group['members'])} תיקיות | "
@@ -68,6 +72,7 @@ def print_duplicate(payload: dict) -> None:
             print("  !!! המערכת לא בטוחה, כדאי לבדוק !!!")
 
 
+# קריאת ההחלטה לקבוצת כפילויות (מחיקה, קבצים משותפים או דילוג)
 def read_duplicate_decision(payload: dict) -> dict:
     members = {m["id"]: m["path"] for m in payload["item"]["members"]}
     if payload.get("blocked_reason"):
@@ -95,6 +100,7 @@ def read_duplicate_decision(payload: dict) -> dict:
         print("  פקודה לא תקינה. יש לבחור מזהים קיימים, ולא את כל התיקיות בקבוצה.")
 
 
+# הדפסת פריט ZIP וקבצים חסרים
 def print_zip(payload: dict) -> None:
     item = payload["item"]
     status = "חולץ במלואו" if item["fully_extracted"] else "חולץ חלקית"
@@ -109,6 +115,7 @@ def print_zip(payload: dict) -> None:
             print(f"    - {missing}")
 
 
+# קריאת ההחלטה לפריט ZIP
 def read_zip_decision(payload: dict) -> dict:
     commands = {"z": "delete_zip", "f": "delete_folder", "s": "skip"}
     while True:
@@ -118,12 +125,14 @@ def read_zip_decision(payload: dict) -> dict:
         print("  פקודה לא תקינה.")
 
 
+# הדפסת רשימת התיקיות הריקות
 def print_empty_folders(payload: dict) -> None:
     print(f"\n=== תיקיות ריקות ({len(payload['folders'])}) ===")
     for number, path in enumerate(payload["folders"], start=1):
         print(f"  {number}. {path}")
 
 
+# קריאת התיקיות הריקות שנבחרו למחיקה
 def read_empty_folders_decision(payload: dict) -> dict:
     folders = payload["folders"]
     while True:
@@ -141,6 +150,7 @@ def read_empty_folders_decision(payload: dict) -> dict:
         print("  פקודה לא תקינה.")
 
 
+# הצגת הפריט שממתין לאישור וקריאת ההחלטה לפי סוגו
 def handle_interrupt(payload: dict) -> dict:
     if payload["type"] == "duplicate":
         print_duplicate(payload)
@@ -155,6 +165,7 @@ def handle_interrupt(payload: dict) -> dict:
 # -------------------------------------------------------------------- Run
 
 
+# הדפסת הסיכום בסוף ההרצה
 def print_summary(summary: dict) -> None:
     print("\n=== סיכום ===")
     print(f"  פריטים שנבדקו: {summary['reviewed']}")
@@ -173,6 +184,7 @@ def print_summary(summary: dict) -> None:
     print(f"  יומן פעולות: {summary['log_file']}")
 
 
+# הפעלת הגרף ומענה על כל עצירה עד שההרצה מסתיימת
 def drive(app, config: dict, start_input: dict | None) -> None:
     """Invoke the graph and answer interrupts until it finishes."""
     pending = start_input
@@ -191,6 +203,7 @@ def drive(app, config: dict, start_input: dict | None) -> None:
     print_summary(app.get_state(config).values["summary"])
 
 
+# נקודת הכניסה: הרצה חדשה עם נתיבים או המשך עם --thread
 def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="איתור תיקיות כפולות (מצב טרמינל)")

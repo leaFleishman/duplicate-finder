@@ -26,6 +26,7 @@ ZIP_FLAG_ENCRYPTED = 0x1
 ZIP_FLAG_UTF8 = 0x800
 
 
+# מידע על קובץ שנסרק: נתיב, גודל, זמן שינוי ומפתח ה-hash
 @dataclass
 class FileInfo:
     path: str
@@ -34,6 +35,7 @@ class FileInfo:
     hash_key: str = ""
 
 
+# מידע על תיקייה: קבצים ישירים, תתי-תיקיות, וסכומים לכל העומק
 @dataclass
 class FolderInfo:
     path: str
@@ -51,6 +53,7 @@ class FolderInfo:
     is_empty: bool = False
 
 
+# תוצאת הסריקה: כל התיקיות, סדר הסריקה והאזהרות
 @dataclass
 class ScanResult:
     roots: list[str]
@@ -63,6 +66,7 @@ class ScanResult:
 # ---------------------------------------------------------------- Helpers
 
 
+# האם נתיב זהה לתיקייה או נמצא בתוכה (בלי תלות באותיות גדולות/קטנות)
 def is_within(path: str, parent: str) -> bool:
     """True if path equals parent or is located inside it."""
     path = os.path.normcase(os.path.normpath(path))
@@ -70,18 +74,21 @@ def is_within(path: str, parent: str) -> bool:
     return path == parent or path.startswith(parent.rstrip(os.sep) + os.sep)
 
 
+# המרת זמן לפורמט תאריך ושעה לתצוגה
 def _format_time(timestamp: float) -> str:
     if not timestamp:
         return ""
     return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M")
 
 
+# ניסוח אזהרה בעברית על נתיב שאי אפשר לגשת אליו
 def _access_warning(path: str, error: OSError) -> str:
     if isinstance(error, PermissionError):
         return f"אין הרשאת גישה, דולג: {path}"
     return f"לא ניתן לגשת, דולג: {path} ({error.strerror or error})"
 
 
+# כל הקבצים שנסרקו בתוך תיקייה, בכל עומק
 def _iter_files(scan_result: ScanResult, folder_path: str):
     """Yield all scanned files under a folder, at every depth."""
     stack = [folder_path]
@@ -91,6 +98,7 @@ def _iter_files(scan_result: ScanResult, folder_path: str):
         stack.extend(folder.subfolders)
 
 
+# בדיקת תיקייה שהמשתמשת הזינה: קיימת, תיקייה, ולא ברשימת הדילוג
 def validate_root(path: str) -> str | None:
     """Return a Hebrew error message if a user-entered root is not valid."""
     if not os.path.exists(path):
@@ -106,6 +114,7 @@ def validate_root(path: str) -> str | None:
 # ------------------------------------------------------------------- Scan
 
 
+# הסריקה המלאה: מעבר על התיקיות, חישוב hash וסיכום לכל תיקייה
 def scan(roots: list[str]) -> ScanResult:
     result = ScanResult(roots=_normalize_roots(roots))
     for root in result.roots:
@@ -116,6 +125,7 @@ def scan(roots: list[str]) -> ScanResult:
     return result
 
 
+# סריקה בלי חישוב hash (לבדיקות חוזרות ולתיקיות ריקות)
 def _walk_without_hashing(roots: list[str]) -> ScanResult:
     """Same traversal and skip rules as scan(), without reading file contents."""
     result = ScanResult(roots=_normalize_roots(roots))
@@ -125,24 +135,28 @@ def _walk_without_hashing(roots: list[str]) -> ScanResult:
     return result
 
 
+# הגודל ומספר הקבצים הנוכחיים של תיקייה, לבדיקה לפני מחיקה
 def measure_folder(path: str) -> tuple[int, int]:
     """Current (total size, file count) of a folder, counted like the scan."""
     folder = _walk_without_hashing([path]).folders[os.path.abspath(path)]
     return folder.total_size, folder.file_count
 
 
+# האם תיקייה ריקה כרגע בדיסק
 def is_empty_on_disk(path: str) -> bool:
     if not os.path.isdir(path):
         return False
     return _walk_without_hashing([path]).folders[os.path.abspath(path)].is_empty
 
 
+# חישוב מחדש של התיקיות הריקות ישירות מהדיסק
 def find_empty_folders_on_disk(roots: list[str]) -> list[str]:
     """Recompute the empty-folder list directly from the disk."""
     existing = [root for root in roots if os.path.isdir(root)]
     return find_empty_folders(_walk_without_hashing(existing))
 
 
+# נתיבים מלאים בלי כפילויות ובלי תיקייה שנמצאת בתוך תיקייה אחרת ברשימה
 def _normalize_roots(roots: list[str]) -> list[str]:
     """Absolute paths, without duplicates or roots nested inside other roots."""
     kept = []
@@ -152,6 +166,7 @@ def _normalize_roots(roots: list[str]) -> list[str]:
     return kept
 
 
+# מעבר על עץ התיקיות של תיקיית שורש אחת, בלי לעקוב אחרי קיצורי דרך
 def _walk(root: str, result: ScanResult) -> None:
     # The root itself is always scanned; skip rules apply only inside it.
     stack = [(root, None)]
@@ -175,6 +190,7 @@ def _walk(root: str, result: ScanResult) -> None:
                 stack.append((subfolder, path))
 
 
+# טיפול ברשומה אחת: דילוג, רישום קובץ, או החזרת תת-תיקייה לסריקה
 def _process_entry(entry: os.DirEntry, folder: FolderInfo, warnings: list[str]) -> str | None:
     """Record a file in the folder, or return a subfolder path to scan."""
     try:
@@ -204,6 +220,7 @@ def _process_entry(entry: os.DirEntry, folder: FolderInfo, warnings: list[str]) 
     return None
 
 
+# האם הרשומה היא symlink או junction (לא נכנסים אליהם)
 def _is_link(entry: os.DirEntry, attributes: int) -> bool:
     """Symlinks and junctions are never followed."""
     if entry.is_symlink():
@@ -214,6 +231,7 @@ def _is_link(entry: os.DirEntry, attributes: int) -> bool:
     return False
 
 
+# חישוב hash רק לקבצים שיש קובץ אחר באותו גודל בדיוק
 def _hash_files(files: list[FileInfo], warnings: list[str]) -> None:
     """Hash only files that share their exact size with another file."""
     by_size = defaultdict(list)
@@ -231,6 +249,7 @@ def _hash_files(files: list[FileInfo], warnings: list[str]) -> None:
             file.hash_key = digest
 
 
+# חישוב SHA-256 של קובץ בבלוקים; None אם אי אפשר לקרוא אותו
 def sha256_file(path: str) -> str | None:
     """SHA-256 of a file, read in blocks; None if it cannot be read."""
     digest = hashlib.sha256()
@@ -243,6 +262,7 @@ def sha256_file(path: str) -> str | None:
     return digest.hexdigest()
 
 
+# סיכום מלמטה למעלה: גודל, מספר קבצים, תאריך, hash ו"ריקה" לכל תיקייה
 def _aggregate(result: ScanResult) -> None:
     """Compute per-folder totals bottom-up (children before parents)."""
     for path in reversed(result.order):
@@ -264,6 +284,7 @@ def _aggregate(result: ScanResult) -> None:
 # ------------------------------------------------------------- Candidates
 
 
+# כל המועמדים: קבוצות כפילויות, ZIP ותיקיות ריקות (עם סינון בין פרויקטים)
 def find_candidates(
     scan_result: ScanResult,
     overlap_threshold: float,
@@ -282,6 +303,7 @@ def find_candidates(
     }
 
 
+# האם כל חברי הקבוצה בפרויקטים שונים
 def is_cross_project(group: dict) -> bool:
     """True if every member is inside a project and no two members share a project."""
     projects = [m.get("project") for m in group["members"]]
@@ -291,6 +313,7 @@ def is_cross_project(group: dict) -> bool:
     return len(normalized) == len(projects)
 
 
+# הסרת קבוצות שבין פרויקטים, כשהקבוצות המוסתרות שלהן עולות במקומן
 def drop_cross_project(groups: list[dict], hidden_children: dict) -> tuple[list[dict], dict, int]:
     """Remove cross-project groups (a library copied into two projects is needed in both).
 
@@ -299,6 +322,7 @@ def drop_cross_project(groups: list[dict], hidden_children: dict) -> tuple[list[
     """
     skipped = 0
 
+    # הקבוצות שנשארות מתוך רשימה, כשילדים של קבוצה שהוסרה עולים במקומה
     def visible(children: list[dict]) -> list[dict]:
         nonlocal skipped
         result = []
@@ -328,6 +352,7 @@ def drop_cross_project(groups: list[dict], hidden_children: dict) -> tuple[list[
     return top_level, kept_hidden, skipped
 
 
+# כל הקבוצות: הראשיות וגם המוסתרות
 def _all_groups(groups: list[dict], hidden_children: dict) -> list[dict]:
     return groups + [child for children in hidden_children.values() for child in children]
 
@@ -335,6 +360,7 @@ def _all_groups(groups: list[dict], hidden_children: dict) -> list[dict]:
 # ------------------------------------------------------ Duplicate folders
 
 
+# מציאת קבוצות כפילויות: אינדקס הפוך, Jaccard/containment, שותף טוב ביותר
 def find_duplicate_groups(
     scan_result: ScanResult, overlap_threshold: float, min_folder_size_mb: float
 ) -> tuple[list[dict], dict[str, list[dict]]]:
@@ -359,6 +385,7 @@ def find_duplicate_groups(
 
     union_parent = {}
 
+    # מציאת השורש של איחוד תיקיות זהות (union-find)
     def find_root(path):
         while union_parent.get(path, path) != path:
             path = union_parent[path]
@@ -409,12 +436,14 @@ def find_duplicate_groups(
     return _split_top_level(groups)
 
 
+# האם תיקיית האב מכילה רק את התיקייה הזו (אז משווים רק את האב)
 def _same_content_as_parent(scan_result: ScanResult, folder: FolderInfo) -> bool:
     """A folder whose parent holds nothing else is represented by the parent."""
     parent = scan_result.folders.get(folder.parent)
     return parent is not None and parent.file_count == folder.file_count
 
 
+# חישוב Jaccard ו-containment בין שני אוספי hash
 def _overlap(hashes_a: Counter, hashes_b: Counter) -> tuple[float, float]:
     """Multiset Jaccard and containment (shared / smaller folder)."""
     shared = sum((hashes_a & hashes_b).values())
@@ -423,6 +452,7 @@ def _overlap(hashes_a: Counter, hashes_b: Counter) -> tuple[float, float]:
     return shared / union, shared / smaller
 
 
+# האם התיקייה מכילה קובץ שמסמן פרויקט (index.html, package.json וכדומה)
 def _is_project_root(path: str) -> bool:
     try:
         with os.scandir(path) as iterator:
@@ -436,6 +466,7 @@ def _is_project_root(path: str) -> bool:
     return False
 
 
+# תיקיית האב הקרובה ביותר שהיא פרויקט, או None
 def find_project(path: str, cache: dict | None = None) -> str | None:
     """The nearest ancestor folder (not the folder itself) that is a project root, or None."""
     cache = {} if cache is None else cache
@@ -451,6 +482,7 @@ def find_project(path: str, cache: dict | None = None) -> str | None:
         current = parent
 
 
+# הקבצים בחבר אחד שיש להם עותק זהה בחבר אחר, עם הנתיב של העותק
 def _shared_files(files: list[FileInfo], path: str, other_files: list[FileInfo], other_path: str) -> list[dict]:
     """Files of one member that have an identical copy (same SHA-256) in another member."""
     copy_by_hash = {}
@@ -470,6 +502,7 @@ def _shared_files(files: list[FileInfo], path: str, other_files: list[FileInfo],
     return sorted(shared, key=lambda s: s["relative_path"])
 
 
+# בניית קבוצה לתצוגה: חברים, קבצים ייחודיים, קבצים משותפים ופרויקט
 def _build_group(scan_result: ScanResult, member_paths: list[str], jaccard: float, containment: float) -> dict:
     folders = scan_result.folders
     project_cache = scan_result.project_cache
@@ -522,6 +555,7 @@ def _build_group(scan_result: ScanResult, member_paths: list[str], jaccard: floa
     }
 
 
+# האם כל חבר בקבוצה אחת נמצא בתוך חבר בקבוצה אחרת
 def _covers(outer: dict, inner: dict) -> bool:
     """True if every member of inner is located inside a member of outer."""
     return all(
@@ -530,6 +564,7 @@ def _covers(outer: dict, inner: dict) -> bool:
     )
 
 
+# חלוקה לקבוצות ראשיות וקבוצות מוסתרות תחת קבוצת האב הקרובה
 def _split_top_level(groups: list[dict]) -> tuple[list[dict], dict[str, list[dict]]]:
     top_level = []
     hidden_children = defaultdict(list)
@@ -547,6 +582,7 @@ def _split_top_level(groups: list[dict]) -> tuple[list[dict], dict[str, list[dic
 # -------------------------------------------------------------- ZIP files
 
 
+# מציאת קובצי ZIP שכבר חולצו, במלואם או חלקית
 def find_zip_items(scan_result: ScanResult) -> list[dict]:
     items = []
     for path in scan_result.order:
@@ -561,6 +597,7 @@ def find_zip_items(scan_result: ScanResult) -> list[dict]:
     return items
 
 
+# בדיקת ZIP אחד מול התיקייה באותו שם: מה חולץ ומה חסר
 def _check_zip(scan_result: ScanResult, parent: FolderInfo, zip_file: FileInfo) -> dict | None:
     stem = os.path.splitext(os.path.basename(zip_file.path))[0].casefold()
     target = next(
@@ -593,6 +630,7 @@ def _check_zip(scan_result: ScanResult, parent: FolderInfo, zip_file: FileInfo) 
     }
 
 
+# רשימת הקבצים בארכיון (נתיב וגודל); None לארכיון פגום או מוצפן
 def _read_zip_entries(path: str, warnings: list[str]) -> list[tuple[str, int]] | None:
     """Return (relative path, uncompressed size) for each file in the archive."""
     try:
@@ -607,6 +645,7 @@ def _read_zip_entries(path: str, warnings: list[str]) -> list[tuple[str, int]] |
     return [(os.path.normpath(_zip_entry_name(info)), info.file_size) for info in infos]
 
 
+# שחזור שמות בעברית בארכיונים שלא סימנו UTF-8
 def _zip_entry_name(info: zipfile.ZipInfo) -> str:
     """Recover Hebrew names from archives that do not set the UTF-8 flag."""
     name = info.filename
@@ -623,6 +662,7 @@ def _zip_entry_name(info: zipfile.ZipInfo) -> str:
     return name
 
 
+# טיפול בחילוץ כפול (תיקייה בתוך תיקייה באותו שם): השוואה מול הפנימית
 def _unwrap_double_nesting(scan_result: ScanResult, folder: FolderInfo) -> FolderInfo:
     """Handle 'name/name/...' produced by some extraction tools."""
     if not folder.files and len(folder.subfolders) == 1:
@@ -635,6 +675,7 @@ def _unwrap_double_nesting(scan_result: ScanResult, folder: FolderInfo) -> Folde
 # ---------------------------------------------------------- Empty folders
 
 
+# התיקייה הריקה הגבוהה בכל ענף (בלי תיקיות השורש)
 def find_empty_folders(scan_result: ScanResult) -> list[str]:
     """Highest empty folder in each branch. Scan roots themselves are never listed."""
     folders = scan_result.folders

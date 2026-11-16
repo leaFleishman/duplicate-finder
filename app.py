@@ -49,12 +49,14 @@ PATH_INSTRUCTIONS = (
 # ----------------------------------------------------------- Shared resources
 
 
+# הגרף עם SqliteSaver, נבנה פעם אחת לכל התהליך
 @st.cache_resource
 def get_app():
     """The compiled graph with its SqliteSaver connection, built once per process."""
     return graph.build_graph(graph.open_checkpointer())
 
 
+# נעילה שמונעת הפעלה כפולה של הגרף במקביל
 @st.cache_resource
 def get_lock() -> threading.Lock:
     """Serializes graph invocations, so a resume can never run twice in parallel."""
@@ -64,29 +66,35 @@ def get_lock() -> threading.Lock:
 # ------------------------------------------------------------------ Helpers
 
 
+# נתיב בתוך HTML, מוצג משמאל לימין
 def path_html(path: str) -> str:
     return f'<span class="ltr">{html.escape(path)}</span>'
 
 
+# בידוד ערך משמאל לימין (כמו גודל) בתוך HTML בעברית
 def bdi(text: str) -> str:
     """Isolate a left-to-right value (such as "1.25 MB") inside right-to-left HTML."""
     return f"<bdi>{html.escape(text)}</bdi>"
 
 
+# בידוד ערך משמאל לימין בטקסט רגיל, בעזרת סימני כיוון
 def ltr(text: str) -> str:
     """Same as bdi() for plain-text labels: Unicode LEFT-TO-RIGHT ISOLATE ... POP DIRECTIONAL ISOLATE."""
     return f"⁦{text}⁩"
 
 
+# בידוד שם שיכול להיות בעברית או באנגלית
 def isolate(text: str) -> str:
     """FIRST STRONG ISOLATE: for names that may be Hebrew or English."""
     return f"⁨{text}⁩"
 
 
+# גודל מעוצב ומבודד לתצוגה ב-HTML
 def size_html(size_bytes: int) -> str:
     return bdi(format_size(size_bytes))
 
 
+# טבלת HTML מימין לשמאל
 def html_table(headers: list[str], rows: list[list[str]]) -> str:
     """Cells must already be HTML-escaped."""
     head = "".join(f"<th>{html.escape(h)}</th>" for h in headers)
@@ -94,10 +102,12 @@ def html_table(headers: list[str], rows: list[list[str]]) -> str:
     return f'<table class="rtl-table"><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>'
 
 
+# רשימת HTML מימין לשמאל
 def html_list(items: list[str]) -> str:
     return '<ul class="rtl-list">' + "".join(f"<li>{item}</li>" for item in items) + "</ul>"
 
 
+# פירוק תיבת הנתיבים לרשימה, בלי שורות ריקות, מירכאות וכפילויות
 def parse_roots(text: str) -> list[str]:
     roots = []
     for line in text.splitlines():
@@ -107,10 +117,12 @@ def parse_roots(text: str) -> list[str]:
     return roots
 
 
+# הגדרות הקריאה לגרף של ההרצה הנוכחית
 def current_config() -> dict:
     return graph.thread_config(st.session_state.thread_id)
 
 
+# שמירת מזהה ההרצה ב-session וב-URL
 def set_thread(thread_id: str) -> None:
     st.session_state.thread_id = thread_id
     st.query_params["thread"] = thread_id
@@ -120,6 +132,7 @@ def set_thread(thread_id: str) -> None:
 # Callbacks only record the request; it is executed once in process_request().
 
 
+# לחיצה על "התחל סריקה": בדיקת הנתיבים ורישום בקשה (פעם אחת בלבד)
 def request_start(token: str) -> None:
     if token != st.session_state.get("start_token"):
         return  # A second click on a button rendered before the first click was handled
@@ -139,10 +152,12 @@ def request_start(token: str) -> None:
     }}
 
 
+# לחיצה על כפתור החלטה: רישום בקשת resume עם מזהה ה-interrupt
 def request_resume(interrupt_id: str, decision: dict) -> None:
     st.session_state.request = {"kind": "resume", "interrupt_id": interrupt_id, "decision": decision}
 
 
+# המשך הרצה קודמת לפי המזהה שהוזן
 def request_open_thread() -> None:
     thread_id = st.session_state.get("thread_input", "").strip()
     if not thread_id or not get_app().get_state(graph.thread_config(thread_id)).values:
@@ -152,11 +167,13 @@ def request_open_thread() -> None:
     set_thread(thread_id)
 
 
+# סימון או ניקוי של כל תיבות הסימון (בחר הכל / נקה הכל)
 def set_checkboxes(keys: list[str], value: bool) -> None:
     for key in keys:
         st.session_state[key] = value
 
 
+# ביצוע הבקשה שנרשמה, פעם אחת, אחרי בדיקה שה-interrupt עדיין ממתין
 def process_request(app) -> None:
     request = st.session_state.pop("request", None)
     if request is None:
@@ -175,6 +192,7 @@ def process_request(app) -> None:
             app.invoke(Command(resume=request["decision"]), current_config())
 
 
+# המשך הרצה שנעצרה באמצע צומת (לא בעצירה לאישור)
 def continue_stopped_run(app) -> None:
     """A run stopped in the middle of a node (not at an interrupt) continues from its checkpoint."""
     with get_lock():
@@ -187,6 +205,7 @@ def continue_stopped_run(app) -> None:
 # -------------------------------------------------------------------- Sidebar
 
 
+# סרגל הצד: נתיבים, ספים, תיבת סימון, התחלה והמשך הרצה
 def sidebar() -> None:
     with st.sidebar:
         st.header("סריקה חדשה")
@@ -221,6 +240,7 @@ def sidebar() -> None:
 # ---------------------------------------------------------------------- Cards
 
 
+# כרטיס קבוצת כפילויות: טבלה, המלצה, קבצים ייחודיים וכפתורי החלטה
 def duplicate_card(payload: dict, interrupt_id: str) -> None:
     group = payload["item"]
     members = group["members"]
@@ -287,6 +307,7 @@ def duplicate_card(payload: dict, interrupt_id: str) -> None:
         shared_delete_buttons(members, interrupt_id, disabled=bool(blocked))
 
 
+# כפתורי "מחק רק את הקבצים המשותפים" לכל זוג חברים
 def shared_delete_buttons(members: list[dict], interrupt_id: str, disabled: bool = False) -> None:
     """For each member and each other member: delete only the files that also exist there."""
     options = [
@@ -311,6 +332,7 @@ def shared_delete_buttons(members: list[dict], interrupt_id: str, disabled: bool
         )
 
 
+# כרטיס ZIP: נתיבים, גדלים, קבצים חסרים וכפתורי החלטה
 def zip_card(payload: dict, interrupt_id: str) -> None:
     item = payload["item"]
     status = "חולץ במלואו" if item["fully_extracted"] else "חולץ חלקית"
@@ -333,6 +355,7 @@ def zip_card(payload: dict, interrupt_id: str) -> None:
                       key=f"{interrupt_id}:{action}")
 
 
+# מסך התיקיות הריקות עם תיבות סימון ומחיקה
 def empty_folders_card(payload: dict, interrupt_id: str) -> None:
     folders = payload["folders"]
     st.subheader(f"תיקיות ריקות · {len(folders)}")
@@ -350,6 +373,7 @@ def empty_folders_card(payload: dict, interrupt_id: str) -> None:
         st.caption("אם לא מסומנת אף תיקייה, הלחיצה תמשיך לסיכום בלי למחוק.")
 
 
+# מסך הסיכום: מדדים, אזהרות וקישור ליומן
 def summary_card(summary: dict) -> None:
     st.subheader("סיכום")
     columns = st.columns(5)
@@ -379,6 +403,7 @@ def summary_card(summary: dict) -> None:
 # ----------------------------------------------------------------------- Main
 
 
+# נקודת הכניסה: סרגל צד, ביצוע בקשות והצגת הכרטיס המתאים
 def main() -> None:
     st.markdown(RTL_CSS, unsafe_allow_html=True)
     app = get_app()

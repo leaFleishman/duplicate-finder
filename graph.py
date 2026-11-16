@@ -41,6 +41,7 @@ ZIP_ACTIONS = ["delete_zip", "delete_folder", "skip"]
 SHARED_DELETE_VERDICTS = ("identical", "copy_with_changes")
 
 
+# מבנה המצב של הגרף: כל הנתונים שעוברים בין הצמתים ונשמרים ב-checkpoint
 class State(TypedDict):
     roots: list[str]
     settings: dict  # overlap_threshold, min_folder_size_mb, confidence_threshold
@@ -65,6 +66,7 @@ class State(TypedDict):
     scan_result: Annotated[Any, UntrackedValue(object)]
 
 
+# הגדרות ברירת המחדל של הרצה (ספים והצגת כפילויות בין פרויקטים)
 def default_settings() -> dict:
     return {
         "overlap_threshold": config.DEFAULT_OVERLAP_THRESHOLD,
@@ -75,6 +77,7 @@ def default_settings() -> dict:
     }
 
 
+# מצב התחלתי של הרצה חדשה, עם התיקיות וההגדרות שנבחרו
 def initial_state(roots: list[str], settings: dict | None = None) -> dict:
     return {
         "roots": roots,
@@ -97,6 +100,7 @@ def initial_state(roots: list[str], settings: dict | None = None) -> dict:
     }
 
 
+# הגדרות הקריאה לגרף: מזהה ההרצה (להמשך ול-LangSmith) ומגבלת הצעדים
 def thread_config(thread_id: str) -> dict:
     # metadata.thread_id groups a run and its later resumes in the LangSmith Threads view.
     return {
@@ -109,12 +113,14 @@ def thread_config(thread_id: str) -> dict:
 # ---------------------------------------------------------------- Helpers
 
 
+# כל הנתיבים של פריט (חברי קבוצה, או ה-ZIP והתיקייה שלו)
 def item_paths(item: dict) -> list[str]:
     if item["type"] == "duplicate":
         return [member["path"] for member in item["members"]]
     return [item["zip_path"], item["folder_path"]]
 
 
+# האם החלטת המשתמשת תאמה להמלצה: followed / overridden / skipped
 def _recommendation_outcome(item: dict, decision: dict | None, judgement: dict | None) -> str:
     """followed / overridden / skipped, or "" when there was no recommendation or no user decision."""
     if item["type"] != "duplicate" or judgement is None or decision is None:
@@ -130,6 +136,7 @@ def _recommendation_outcome(item: dict, decision: dict | None, judgement: dict |
     return actions.OUTCOME_OVERRIDDEN
 
 
+# רושם ביומן את הפריט הקודם אם הסתיים בדילוג או בסיווג "שונה"
 def _close_previous_item(state: State) -> list[dict]:
     """Log the previous item if it ended without execute (skip or "different")."""
     item, decision, judgement = state["current"], state["decision"], state["judgement"]
@@ -159,16 +166,19 @@ CROSS_PROJECT_BLOCK_MESSAGE = (
 )
 
 
+# האם המחיקה חסומה בקבוצה (כל החברים בפרויקטים שונים)
 def deletion_blocked(item: dict | None) -> bool:
     """A group whose members are all in different projects can only be skipped (even when shown)."""
     return bool(item) and item["type"] == "duplicate" and scanner.is_cross_project(item)
 
 
+# האם להציע "מחק רק קבצים משותפים" לקבוצה הזו
 def shared_delete_allowed(item: dict, judgement: dict | None) -> bool:
     return (item["type"] == "duplicate" and judgement is not None
             and judgement["verdict"] in SHARED_DELETE_VERDICTS and not deletion_blocked(item))
 
 
+# בודק את החלטת המשתמשת והופך כל החלטה לא תקינה לדילוג
 def _sanitize_decision(item: dict, decision: Any, judgement: dict | None = None) -> tuple[dict, str | None]:
     """Turn the resume value into a valid decision; anything invalid becomes skip."""
     action = decision.get("action") if isinstance(decision, dict) else None
@@ -194,6 +204,7 @@ def _sanitize_decision(item: dict, decision: Any, judgement: dict | None = None)
     return {"action": "skip"}, None
 
 
+# רשימת הנתיבים שיימחקו לפי ההחלטה, עם הגודל ומספר הקבצים לבדיקה חוזרת
 def _deletion_targets(item: dict, decision: dict) -> list[dict]:
     if item["type"] == "duplicate":
         members = {m["path"]: m for m in item["members"]}
@@ -210,10 +221,12 @@ def _deletion_targets(item: dict, decision: dict) -> list[dict]:
 # ------------------------------------------------------------------ Nodes
 
 
+# צומת: סריקת התיקיות (נשמר בזיכרון בלבד, לא ב-checkpoint)
 def scan(state: State) -> dict:
     return {"scan_result": scanner.scan(state["roots"])}
 
 
+# צומת: בניית התור (קבוצות כפילויות ו-ZIP) ורשימת התיקיות הריקות
 def find_candidates(state: State) -> dict:
     # After a restart the in-memory scan data is gone, so scan again.
     scan_result = state.get("scan_result") or scanner.scan(state["roots"])
@@ -232,6 +245,7 @@ def find_candidates(state: State) -> dict:
     }
 
 
+# צומת: סוגר את הפריט הקודם ובוחר את הפריט הבא בתור שעדיין קיים
 def pick_next(state: State) -> dict:
     update = {"log": state["log"] + _close_previous_item(state), "judgement": None, "decision": None}
     queue = list(state["queue"])
@@ -247,6 +261,7 @@ def pick_next(state: State) -> dict:
     return {**update, "queue": [], "current": None}
 
 
+# ניתוב: כפילות ל-judge, ZIP לאישור, תור ריק לתיקיות ריקות או לסיכום
 def route_after_pick(state: State) -> str:
     item = state["current"]
     if item is None:
@@ -257,11 +272,13 @@ def route_after_pick(state: State) -> str:
     return "judge" if item["type"] == "duplicate" else "human_review"
 
 
+# עותק של הקבוצה בלי רשימות הקבצים המשותפים, לשליחה ל-LLM
 def _for_llm(group: dict) -> dict:
     """The group without the shared-file lists, which the LLM does not need (and traces stay small)."""
     return {**group, "members": [{k: v for k, v in m.items() if k != "shared_with"} for m in group["members"]]}
 
 
+# צומת: קבלת המלצה מה-LLM, או אזהרה עם סוג הכשל אם לא התקבלה
 def judge(state: State) -> dict:
     result = llm_judge.judge_with_details(_for_llm(state["current"]))
     if result.judgement is not None:
@@ -271,6 +288,7 @@ def judge(state: State) -> dict:
     return {"judgement": None, "warnings": state["warnings"] + [warning]}
 
 
+# ניתוב: "שונה" חוזר לבחירת הפריט הבא, אחרת לאישור המשתמשת
 def route_after_judge(state: State) -> str:
     judgement = state["judgement"]
     if judgement and judgement["verdict"] == "different":
@@ -278,6 +296,7 @@ def route_after_judge(state: State) -> str:
     return "human_review"
 
 
+# צומת: עצירה (interrupt) לאישור המשתמשת. אין פעולות לפני העצירה
 def human_review(state: State) -> dict:
     item, judgement = state["current"], state["judgement"]
     threshold = state["settings"]["confidence_threshold"]
@@ -304,6 +323,7 @@ def human_review(state: State) -> dict:
     return update
 
 
+# ניתוב: מחיקה לביצוע, דילוג לחשיפת קבוצות מוסתרות או לפריט הבא
 def route_after_human_review(state: State) -> str:
     item = state["current"]
     if state["decision"]["action"] != "skip":
@@ -313,11 +333,13 @@ def route_after_human_review(state: State) -> str:
     return "pick_next"
 
 
+# צומת: מוסיף לראש התור את הקבוצות שהיו מוסתרות מתחת לקבוצה שדולגה
 def expand_children(state: State) -> dict:
     children = state["hidden_children"][state["current"]["id"]]
     return {"queue": children + state["queue"]}
 
 
+# בודק אם נתיב מוגן (מחזיק עותק יחיד של קבצים שנמחקו קודם)
 def _protection_problem(path: str, protected_paths: list[str]) -> str | None:
     """A protected folder holds the only remaining copy of deleted files: never delete it,
     anything inside it, or a folder that contains it."""
@@ -328,6 +350,7 @@ def _protection_problem(path: str, protected_paths: list[str]) -> str | None:
     return None
 
 
+# מוחק מחבר אחד רק קבצים שיש להם עותק זהה בחבר אחר, עם בדיקה לכל קובץ
 def _execute_shared(state: State) -> dict:
     """Delete from one member only the files that have an identical copy in another member."""
     item, decision, judgement = state["current"], state["decision"], state["judgement"]
@@ -365,6 +388,7 @@ def _execute_shared(state: State) -> dict:
     }
 
 
+# צומת: ביצוע המחיקה לסל המחזור אחרי בדיקה חוזרת, ורישום ביומן
 def execute(state: State) -> dict:
     item, decision, judgement = state["current"], state["decision"], state["judgement"]
     if deletion_blocked(item):
@@ -408,6 +432,7 @@ def execute(state: State) -> dict:
     }
 
 
+# צומת: חישוב מחדש של התיקיות הריקות מהדיסק, עצירה לבחירה ומחיקה
 def review_empty_folders(state: State) -> dict:
     # Recomputed from disk: includes folders that became empty after deletions.
     folders = scanner.find_empty_folders_on_disk(state["roots"])
@@ -444,6 +469,7 @@ def review_empty_folders(state: State) -> dict:
     }
 
 
+# צומת: סיכום ההרצה (נבדקו, נמחקו, דולגו, מקום שהתפנה, אזהרות)
 def summary(state: State) -> dict:
     log = state["log"]
     reviewed = {row["item_id"] for row in log if row["user_decision"]}
@@ -465,6 +491,7 @@ def summary(state: State) -> dict:
 # ------------------------------------------------------------------ Graph
 
 
+# בניית הגרף: הצמתים, המעברים והמעברים המותנים, עם ה-checkpointer
 def build_graph(checkpointer):
     builder = StateGraph(State)
     builder.add_node("scan", scan)
@@ -494,6 +521,7 @@ def build_graph(checkpointer):
     return builder.compile(checkpointer=checkpointer)
 
 
+# פתיחת SqliteSaver על קובץ ה-checkpoints, לשימוש גם מכמה threads
 def open_checkpointer(db_path: str | None = None) -> SqliteSaver:
     connection = sqlite3.connect(db_path or config.CHECKPOINT_DB_PATH, check_same_thread=False)
     return SqliteSaver(connection)

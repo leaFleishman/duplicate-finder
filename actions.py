@@ -29,6 +29,7 @@ ACTION_DIFFERENT = "סווג כשונה"
 ACTION_SHARED_DELETED = "נמחקו קבצים משותפים"
 
 
+# בדיקה לפני מחיקת קובץ משותף: הוא והעותק קיימים וה-hash שלהם לא השתנה
 def verify_shared_file(path: str, copy_path: str, expected_sha256: str) -> str | None:
     """Before deleting one shared file: the file and its copy in the other member must both
     still exist and still have the scanned hash. Return a warning, or None if it is safe."""
@@ -43,6 +44,7 @@ def verify_shared_file(path: str, copy_path: str, expected_sha256: str) -> str |
     return None
 
 
+# בדיקה לפני מחיקה: הנתיב קיים, והגודל ומספר הקבצים לא השתנו מאז הסריקה
 def revalidate(path: str, expected_size: int, expected_file_count: int, is_file: bool) -> str | None:
     """Return a warning if the path changed since the scan, otherwise None."""
     if is_file:
@@ -58,6 +60,7 @@ def revalidate(path: str, expected_size: int, expected_file_count: int, is_file:
     return None
 
 
+# העברה לסל המחזור; מחזיר אזהרה אם נכשל
 def move_to_recycle_bin(path: str) -> str | None:
     """Return a warning on failure, otherwise None."""
     try:
@@ -67,6 +70,7 @@ def move_to_recycle_bin(path: str) -> str | None:
     return None
 
 
+# בניית שורה ליומן הפעולות
 def make_log_row(
     item_id: str,
     item_type: str,
@@ -97,6 +101,7 @@ def make_log_row(
     }
 
 
+# עדכון כותרת של יומן ישן לעמודות הנוכחיות, בלי לאבד שורות
 def _upgrade_log_header(log_path: str) -> None:
     """A log written by an older version has fewer columns: rewrite it with the current
     header (old rows get empty values in the new columns), so that new rows line up."""
@@ -113,6 +118,7 @@ def _upgrade_log_header(log_path: str) -> None:
     os.replace(temporary, log_path)
 
 
+# הוספת שורות לקובץ היומן (CSV בקידוד שמתאים ל-Excel)
 def append_log(rows: list[dict], log_path: str | None = None) -> None:
     if not rows:
         return

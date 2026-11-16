@@ -29,6 +29,7 @@ MAX_ATTEMPTS = 2  # The first attempt plus one retry
 REQUEST_TIMEOUT_SECONDS = 60
 
 
+# סכמת הפלט של v1 ו-v2: verdict, ביטחון, keep ונימוק
 class Judgement(BaseModel):
     verdict: Literal["identical", "copy_with_changes", "different"] = Field(
         description="identical, copy_with_changes or different"
@@ -40,6 +41,7 @@ class Judgement(BaseModel):
     reason: str = Field(description="Short explanation in Hebrew, 1-3 sentences")
 
 
+# סכמת הפלט של v3: אותם שדות, הנימוק לפני keep
 class JudgementReasonFirst(BaseModel):
     """v3 output schema: the same fields as Judgement, with reason before keep,
     so the model explains before it chooses. Converted to Judgement after parsing."""
@@ -117,12 +119,14 @@ In the reason, name explicitly the IDs of the members to keep and the members to
 for example "לשמור את A, למחוק את B" ("keep A, delete B")."""
 
 
+# הצגת גודל ב-KB או MB בפרומפט
 def _format_size(size_bytes: int) -> str:
     if size_bytes >= 1024 * 1024:
         return f"{size_bytes / (1024 * 1024):.2f} MB"
     return f"{size_bytes / 1024:.0f} KB"
 
 
+# תיאור הקבוצה ל-v1: רק שמות ונתיבים
 def _describe_v1(group: dict) -> str:
     lines = ["Folders:"]
     for member in group["members"]:
@@ -130,6 +134,7 @@ def _describe_v1(group: dict) -> str:
     return "\n".join(lines)
 
 
+# המיקום המשותף לכל החברים והחלק השונה בנתיב של כל אחד
 def split_common_location(paths: list[str]) -> tuple[str, list[str]]:
     """Return (common parent folder, distinct part of each path), compared case-insensitively."""
     split = [os.path.normpath(p).split(os.sep) for p in paths]
@@ -143,6 +148,7 @@ def split_common_location(paths: list[str]) -> tuple[str, list[str]]:
     return prefix, [os.sep.join(parts[common:]) for parts in split]
 
 
+# תיאור הקבוצה ל-v2/v3: חפיפה, מטא-דאטה, קבצים ייחודיים ופרויקט
 def _describe_v2(group: dict) -> str:
     members = group["members"]
     common_location, distinct_parts = split_common_location([m["path"] for m in members])
@@ -171,6 +177,7 @@ def _describe_v2(group: dict) -> str:
     return "\n".join(lines)
 
 
+# בניית ההודעות למודל (system ו-human) לפי גרסת הפרומפט
 def build_messages(group: dict, prompt_version: str) -> list:
     if prompt_version == "v1":
         system = OUTPUT_INSTRUCTIONS
@@ -186,6 +193,7 @@ def build_messages(group: dict, prompt_version: str) -> list:
 # ------------------------------------------------------------- Validation
 
 
+# בדיקת הפלט: מזהי keep קיימים, ו-keep ריק רק כש-verdict הוא different
 def validate_judgement(judgement: Judgement, group: dict) -> None:
     """Raise ValueError if keep does not match the group or the verdict.
 
@@ -204,6 +212,7 @@ def validate_judgement(judgement: Judgement, group: dict) -> None:
 # ------------------------------------------------------------- Invocation
 
 
+# המודל של Gemini עם פלט מובנה לפי הסכמה (נוצר פעם אחת לכל סכמה)
 @lru_cache(maxsize=None)
 def _structured_model(schema: type[BaseModel] = Judgement):
     model = ChatGoogleGenerativeAI(
@@ -225,11 +234,13 @@ FAILURE_LABELS = {  # Hebrew labels, shown to the user in warnings
 }
 
 
+# תוצאת קריאה: ההחלטה (או None) ורשימת הכשלים
 class JudgeResult(NamedTuple):
     judgement: Judgement | None
     failures: list[str]  # One "category: ExceptionName" entry per failed attempt
 
 
+# סיווג שגיאה לסוג: timeout, quota, auth, connection, invalid_output, other
 def classify_error(error: Exception) -> str:
     """Map an exception to one of the FAILURE_LABELS categories."""
     name = type(error).__name__.lower()
@@ -249,6 +260,7 @@ def classify_error(error: Exception) -> str:
     return "other"
 
 
+# תיאור בעברית של הכשל האחרון, לאזהרה למשתמשת
 def describe_failure(failures: list[str]) -> str:
     """Hebrew description of the last failure, for a user-facing warning."""
     if not failures:
@@ -257,11 +269,13 @@ def describe_failure(failures: list[str]) -> str:
     return f"{FAILURE_LABELS.get(category, FAILURE_LABELS['other'])} ({exception_name})"
 
 
+# קבלת המלצה לקבוצה; None אם שני הניסיונות נכשלו
 def judge(group: dict, prompt_version: str | None = None) -> Judgement | None:
     """Return a validated Judgement, or None if both attempts failed."""
     return judge_with_details(group, prompt_version).judgement
 
 
+# כמו judge, ומחזיר גם את סוגי הכשלים (עם תיוג ל-LangSmith)
 def judge_with_details(group: dict, prompt_version: str | None = None) -> JudgeResult:
     """Like judge(), but also report the type of each failed attempt."""
     prompt_version = prompt_version or config.PROMPT_VERSION
@@ -278,6 +292,7 @@ def judge_with_details(group: dict, prompt_version: str | None = None) -> JudgeR
     return _judge_traced(group, prompt_version, trace_info, langsmith_extra=trace_info)
 
 
+# הקריאה בפועל למודל, עם ניסיון חוזר אחד; נשלחת כ-trace ל-LangSmith
 @traceable(run_type="chain", name="judge")
 def _judge_traced(group: dict, prompt_version: str, trace_info: dict) -> JudgeResult:
     messages = build_messages(group, prompt_version)
